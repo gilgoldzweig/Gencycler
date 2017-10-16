@@ -1,0 +1,15 @@
+apply plugin: 'java'
+apply plugin: 'kotlin'
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    compile project(':annotations')
+    implementation "com.squareup:kotlinpoet:$kotlin_poet"
+    compile "com.android.support:recyclerview-v7:$suppprt"
+}
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
