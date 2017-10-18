@@ -38,6 +38,6 @@ internal val elements = ParameterizedTypeName.get(ArrayList::class, GencyclerDat
 internal val elementsList = ParameterizedTypeName.get(List::class, GencyclerDataType::class)
 internal val looper = ClassName("android.os", "Looper")
 internal val build = ClassName("android.os", "Build")
-internal val recyclerAdapterExtension = "RecyclerAdapterExtensionImpl"
+internal val recyclerAdapterExtension = "GencyclerAdapterExtensions"
 internal val recyclerAdapterExtensionImpl = ClassName(PACKAGE_NAME, recyclerAdapterExtension)
 internal val elementsProperty = PropertySpec.builder("elements", elements).mutable(false).build()

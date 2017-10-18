@@ -14,7 +14,6 @@ object EnvironmentUtil {
     fun init(environment: ProcessingEnvironment) {
         processingEnvironment = environment
         initialize = true
-        logWarning("Test Test")
     }
 
     fun logError(message: String) {

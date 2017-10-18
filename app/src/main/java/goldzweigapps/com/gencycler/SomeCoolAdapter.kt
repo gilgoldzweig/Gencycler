@@ -1,69 +1,55 @@
 package goldzweigapps.com.gencycler
 
 import android.content.Context
-import android.view.View
-import android.widget.*
-import goldzweigapps.com.annotations.*
+import android.support.v7.widget.AppCompatImageView
+import android.support.v7.widget.AppCompatTextView
 import goldzweigapps.com.annotations.annotations.GencyclerAdapter
-import goldzweigapps.com.annotations.annotations.GencyclerHolder
-import goldzweigapps.com.annotations.annotations.GencyclerViewType
+import goldzweigapps.com.annotations.annotations.GencyclerViewHolder
+import goldzweigapps.com.annotations.annotations.GencyclerViewField
 import goldzweigapps.com.annotations.interfaces.GencyclerDataType
-import goldzweigapps.com.gencycler.SomeCoolAdapter
-import goldzweigapps.com.gencycler.adapters.MyAdapterCustomName
+import goldzweigapps.com.gencycler.adapters.GencyclerBrandNewAdpapter
 
 
 /**
  * Created by gilgoldzweig on 14/10/2017.
  */
 
-
-const val typeOne = "goldzweigapps.com.gencycler.TypeOne"
-const val typeTwo = "goldzweigapps.com.gencycler.TypeTwo"
-const val typeThree = "goldzweigapps.com.gencycler.TypeThree"
-
-
 @GencyclerAdapter(
-        GencyclerHolder(R.layout.type_one,
-                GencyclerViewType("typeOne", R.id.type_one_one_text, TextView),
-                GencyclerViewType("typeTwo", R.id.type_one_two_text, TextView),
-                GencyclerViewType("typeThree", R.id.type_one_three_text, TextView),
-                classType = typeOne),
+        GencyclerViewHolder(R.layout.type_one,
+                GencyclerViewField("name", R.id.type_one_one_text, AppCompatTextView::class),
+                GencyclerViewField("age", R.id.type_one_two_text, AppCompatTextView::class),
+                GencyclerViewField("profileImage", R.id.type_one_three_text, AppCompatImageView::class),
+                classType = ProfileType::class),
 
-        GencyclerHolder(R.layout.type_two,
-                GencyclerViewType("typeOneText", R.id.type_two_one_text, TextView),
-                GencyclerViewType("typeTwoText", R.id.type_two_three_text, TextView),
-                classType = typeTwo),
+        GencyclerViewHolder(R.layout.type_two,
+                GencyclerViewField("adTitle", R.id.type_two_one_text, AppCompatTextView::class),
+                GencyclerViewField("adPreview", R.id.type_two_three_text, AppCompatImageView::class),
+                classType = AdType::class))
 
-        GencyclerHolder(R.layout.type_three,
-                GencyclerViewType("typeOne", R.id.type_three_one_text, TextView),
-                GencyclerViewType("typeTwo", R.id.type_three_two_text, ImageView),
-                GencyclerViewType("typeThree", R.id.type_three_three_text, RadioButton),
-                classType = typeThree),
-        customName = "MyAdapterCustomName")
+class BrandNewAdpapter(context: Context, elements: ArrayList<GencyclerDataType>):
+        GencyclerBrandNewAdpapter(context, elements) {
 
-class SomeCoolAdapter(context: Context, elements: ArrayList<GencyclerDataType>) :
-        MyAdapterCustomName(context, elements) {
+    override fun ProfileTypeViewHolder
+            .onBindProfileTypeViewHolder(position: Int, element: ProfileType) {
 
-    override fun onBindTypeOneViewHolder(typeOne: TextView,
-                                         typeTwo: TextView,
-                                         typeThree: TextView,
-                                         rootView: View, holder: TypeOneViewHolder,
-                                         position: Int, element: TypeOne) {
+        name.text = element.name
+
+        onClick {
+        }
+        onLongClick {
+
+        }
     }
 
-    override fun onBindTypeTwoViewHolder(typeOneText: TextView,
-                                         typeTwoText: TextView,
-                                         rootView: View, holder: TypeTwoViewHolder,
-                                         position: Int, element: TypeTwo) {
+    override fun AdTypeViewHolder
+            .onBindAdTypeViewHolder(position: Int, element: AdType) {
 
     }
-
-    override fun onBindTypeThreeViewHolder(typeOne: TextView,
-                                           typeTwo: ImageView,
-                                           typeThree: RadioButton,
-                                           rootView: View, holder: TypeThreeViewHolder,
-                                           position: Int, element: TypeThree) {
+class ss(context: Context, elements: ArrayList<GencyclerDataType>) {
+    val adapter = BrandNewAdpapter(context, elements)
+    fun main() {
+        adapter + TypeTwo()
 
     }
-
+}
 }

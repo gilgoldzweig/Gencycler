@@ -6,4 +6,4 @@ package goldzweigapps.com.annotations.annotations
  */
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.CLASS)
-annotation class GencyclerAdapter(vararg val holders: GencyclerHolder, val customName: String = "")
+annotation class GencyclerAdapter(vararg val viewHolders: GencyclerViewHolder, val customName: String = "")
