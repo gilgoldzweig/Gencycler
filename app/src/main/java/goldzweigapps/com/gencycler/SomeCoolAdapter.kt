@@ -45,11 +45,5 @@ class BrandNewAdpapter(context: Context, elements: ArrayList<GencyclerDataType>)
             .onBindAdTypeViewHolder(position: Int, element: AdType) {
 
     }
-class ss(context: Context, elements: ArrayList<GencyclerDataType>) {
-    val adapter = BrandNewAdpapter(context, elements)
-    fun main() {
-        adapter + TypeTwo()
 
-    }
-}
 }

@@ -9,6 +9,7 @@ import java.io.File
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
+import javax.annotation.processing.SupportedOptions
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.MirroredTypeException
@@ -21,8 +22,9 @@ import javax.lang.model.type.MirroredTypeException
 /**
  * Created by gilgoldzweig on 12/10/2017.
  */
-//@AutoService(Processor::class)
+
 class GencyclerProcessor: AbstractProcessor() {
+
     var round = -1
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnvironment: RoundEnvironment?): Boolean {
         if (roundEnvironment == null) return true
