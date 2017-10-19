@@ -17,8 +17,8 @@ And it's written in kotlin <3.
          maven { url "https://jitpack.io" }
       }
       dependencies {
-            compile 'com.github.gilgoldzweig:annotations:version'
-            kapt 'com.github.gilgoldzweig:compiler:version' // if your'e using java replace 'kapt' with 'annotationProcessor'
+            compile 'com.github.gilgoldzweig.Gencycler:annotations:version'
+            kapt 'com.github.gilgoldzweig.Gencycler:compiler:version' // if your'e using java replace 'kapt' with 'annotationProcessor'
       }
 
 ### Usage
