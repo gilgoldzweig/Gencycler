@@ -42,7 +42,6 @@ class Generator(private val viewHolders: List<GencyclerViewHolderImpl>) {
         val layoutSwitch = CodeBlock.builder()
         layoutSwitch.add("when (holder) {")
         for (holder in viewHolders) {
-
             val dataType = ClassName.bestGuess(holder.classType)
             layoutSwitch.add("""
 
@@ -68,11 +67,16 @@ class Generator(private val viewHolders: List<GencyclerViewHolderImpl>) {
                 .returns(Int::class)
                 .addModifiers(KModifier.OVERRIDE)
         val layoutSwitch = CodeBlock.builder()
+        var supportedTypes = ""
         layoutSwitch.add("return when(elementList[position]) {\n")
         for (holder in viewHolders) {
-            layoutSwitch.add("\n        is %T -> %L", ClassName.bestGuess(holder.classType), holder.layoutResId)
+            val dataType = ClassName.bestGuess(holder.classType)
+            supportedTypes += "${dataType.simpleName()}, "
+            layoutSwitch.add("\n        is %T -> %L", dataType, holder.layoutResId)
         }
-        layoutSwitch.add("\n        else -> -1")
+        supportedTypes = supportedTypes.removeLastChars(2)
+        layoutSwitch.add("\n        else -> throw %T(\"unsupported type at \$position, only ($supportedTypes) are supported\")",
+                IOException::class.asClassName())
         layoutSwitch.add("\n}")
         getItemViewType.addCode(layoutSwitch.build())
         return getItemViewType.build()
@@ -141,7 +145,8 @@ private fun FunSpec.Builder.addElementWithPosition(withDefault: Boolean = true) 
     }
 
 }
-private fun String.removeLastChars(countFromEnd: Int) = removeRange(length - countFromEnd, length)
+private fun String.removeLastChars(countFromEnd: Int) = if (length > countFromEnd)
+    removeRange(length - countFromEnd, length) else this
 //endregion utils
 //region adapter extension methods
 private fun generateSetItemsFunction() =
