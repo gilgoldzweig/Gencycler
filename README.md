@@ -6,6 +6,23 @@ The adapter gives you a thread-safe way to access the elements just like a list.
 It does that by using extension functions like add, in(contains), remove, and much more(Look below to see full function list)
 And it's written in kotlin <3.
 
+[![Release](https://jitpack.io/v/User/Repo.svg)]
+(https://jitpack.io/#User/Repo)
+
+### Install
+`
+//If your'e using java you don'tneed this part
+apply plugin: 'kotlin-kapt'
+
+   repositories {
+        maven { url "https://jitpack.io" }
+   }
+   dependencies {
+         compile 'com.github.gilgoldzweig:annotations:version'
+         kapt 'com.github.gilgoldzweig:compiler:version' if your'e using java replace 'kapt' with 'annotationProcessor'
+   }
+
+`
 ### Usage
 In order to use it, your data types must implement an empty interface,
 `GencyclerDataType`
