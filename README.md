@@ -1,17 +1,17 @@
 # Gencycler
 
-### Gencycler is an compile time annotation processor, that writes the RecyclerView adapter code for you.
+### Gencycler is a compile time annotation processor, that writes the RecyclerView adapter code for you.
 
-The adpater gives you a thread safe way to access the elements just like a list.
+The adapter gives you a thread-safe way to access the elements just like a list.
 It does that by using extension functions like add, in(contains), remove, and much more(Look below to see full function list)
-And it's written competently, in kotlin(<3).
+And it's written in kotlin <3.
 
 ### Usage
-In order to use it your data types must implement an empty interface,
+In order to use it, your data types must implement an empty interface,
 `GencyclerDataType`
-The class let's the adapter identify between multiple view types and determine which is needed to be inflated.
+The class lets the adapter identify between multiple view types and determine which is needed to be inflated.
 
-In order for use to decide when each type is inflated at what time you pass a list of the interface.
+In order for the adapter to decide when each type is inflated and at what time you pass a list of the interface.
 
 
 ##### I'm using 'data class' but it could be anything that implements the interface.
@@ -24,8 +24,9 @@ In order for use to decide when each type is inflated at what time you pass a li
 
 #### Now to the actual adapter
 
-        @GencyclerAdapter( 
-            GencyclerViewHolder(R.layout.person_layout, //the layout res you want to be created 
+    @GencyclerAdapter( 
+
+        GencyclerViewHolder(R.layout.person_layout, //the layout res you want to be created 
             
                 GencyclerViewField("name", //fieldName 
                                    R.id.type_one_one_text, // view's id
@@ -39,11 +40,11 @@ In order for use to decide when each type is inflated at what time you pass a li
                                    R.id.home_location_text,
                                    AppCompatImageView::class), //same as above
                                    
-                classType = PersonType::class),
-                //the class you want to use when the holder is binded
+                classType = PersonType::class), //the class you want to use when the holder is binded
         
-         //another view holder
-         GencyclerViewHolder(R.layout.ad_layout,
+        
+        //another view holder
+        GencyclerViewHolder(R.layout.ad_layout,
         
                 GencyclerViewField("adTitle",
                                    R.id.ad_title_text,
@@ -54,12 +55,13 @@ In order for use to decide when each type is inflated at what time you pass a li
                                    AppCompatImageView::class),
                                    
                 classType = AdType::class),
-        customName = ""
-        // You can define a custom name for your generated adapter, if nothing is provided the name would be the same as your class name with a "Gencycler" prefix, example: "GencyclerYourAdapter")
+                
+        customName = ""        // You can define a custom name for your generated adapter, if nothing is provided the name would be the same as your class name with a "Gencycler" prefix, example: "GencyclerYourAdapter")
 
     class YourAdapter(val context: Context, val elements: ArrayList<GencyclerDataType>) `
 
 #### Build your app and the adapter will be generated to use it just extend it
+
 
 
     class YourAdapter(context: Context, elements: ArrayList<GencyclerDataType>): GencyclerYourAdapter(context, elements) {
@@ -129,7 +131,7 @@ In order for use to decide when each type is inflated at what time you pass a li
 
 `customRecyclerAdapter.isNotEmpty()`
 
- More functions and fetures will come in the feutre follow me on github and receive updates as soon as i make them.
+ More functions and features will come in the future follow me on GitHub and receive updates as soon as I make them.
 
 
 MIT License
@@ -153,6 +155,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-
-
