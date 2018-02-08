@@ -14,4 +14,5 @@
         android:id="@+id/type_three_three_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
+    <include layout="@layout/type_one"/>
 </LinearLayout>

@@ -10,6 +10,12 @@ import kotlin.reflect.KClass
 annotation class GencyclerViewField(val name: String = "",
                                     val resId: Int = 0,
                                     val viewType: KClass<out Any>)
-class GencyclerViewFieldImpl(val name: String = "",
+
+data class GencyclerViewFieldImpl(val name: String = "",
                              val resId: Int = 0,
                              val viewType: String)
+
+data class GencyclerViewImpl(val name: String = "",
+                             val resId: String,
+                             val viewType: String,
+                             val field: GencyclerField? = null)
