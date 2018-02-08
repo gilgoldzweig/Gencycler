@@ -1,7 +1,5 @@
 package goldzweigapps.com.gencycler
 
-import goldzweigapps.com.annotations.annotations.GencyclerField
-import goldzweigapps.com.annotations.annotations.GencyclerFieldType
 import goldzweigapps.com.annotations.annotations.experimental.GencyclerHolder
 import goldzweigapps.com.annotations.interfaces.GencyclerDataType
 

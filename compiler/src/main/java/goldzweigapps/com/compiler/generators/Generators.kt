@@ -1,4 +1,4 @@
-package goldzweigapps.com.compiler.generators.experimental
+package goldzweigapps.com.compiler.generators
 
 import com.squareup.kotlinpoet.*
 import goldzweigapps.com.annotations.annotations.GencyclerHolderImpl
@@ -46,7 +46,7 @@ class Generators(private val viewHolders: List<GencyclerHolderImpl>) {
             layoutSwitch.add("""
 
                 is ${dataType.simpleName()}${METHOD_VIEW_HOLDER_CUSTOM} ->
-                        holder.${METHOD_BIND_CUSTOM}${dataType.simpleName()}${METHOD_VIEW_HOLDER_CUSTOM}(position, elementList[position] as ${dataType.simpleName()})
+                        holder.${METHOD_BIND_CUSTOM}${dataType.simpleName()}${METHOD_VIEW_HOLDER_CUSTOM}(position, elements[position] as ${dataType.simpleName()})
 
             """.trimIndent())
         }
@@ -68,7 +68,7 @@ class Generators(private val viewHolders: List<GencyclerHolderImpl>) {
                 .addModifiers(KModifier.OVERRIDE)
         val layoutSwitch = CodeBlock.builder()
         var supportedTypes = ""
-        layoutSwitch.add("return when(elementList[position]) {\n")
+        layoutSwitch.add("return when(elements[position]) {\n")
         for (holder in viewHolders) {
             val dataType = ClassName.bestGuess(holder.classType)
             supportedTypes += "${dataType.simpleName()}, "
@@ -130,7 +130,7 @@ val positionWithDefault = ParameterSpec.builder("position", Int::class)
 val element = ParameterSpec.builder("element", GencyclerDataType::class)
         .build()
 
-val elementList = ParameterSpec.builder("elementList", elementsList)
+val elementList = ParameterSpec.builder("elementList", elements)
         .build()
 //endregion helper fields
 //region utils
@@ -153,7 +153,7 @@ private fun generateSetItemsFunction() =
                 .addModifiers(KModifier.OPEN)
                 .addParameter(elementList)
                 .addStatement("""
-                    $elementsConst = ArrayList(elementList)
+                    $elementsConst = elementList
                     if (isUiThread()) notifyDataSetChanged()
                     """.trimIndent())
                 .build()
@@ -163,7 +163,7 @@ private fun generateSetItemFunction() =
                 .addModifiers(KModifier.OPEN)
                 .addElementWithPosition(false)
                 .addStatement("""
-                        $elementsConst[position] = element
+                        ${elementsConst}[position] = element
                         if (isUiThread()) notifyItemChanged(position)
                         """.trimIndent())
                 .build()
@@ -173,7 +173,7 @@ private fun generateAddFunction() =
                 .addModifiers(KModifier.OPEN)
                 .addElementWithPosition()
                 .addStatement("""
-                    $elementsConst.add(position, element)
+                    ${elementsConst}.add(position, element)
                     if (isUiThread()) notifyItemInserted(position)
                     """.trimIndent())
                 .build()
@@ -184,8 +184,8 @@ private fun generateAddRangeFunction() =
                 .addParameter("rangeToInsert", elementsList)
                 .addParameter(positionWithDefault)
                 .addStatement("""
-    $elementsConst.addAll(position, rangeToInsert)
-    if (isUiThread()) notifyItemInserted(position)
+    ${elementsConst}.addAll(position, rangeToInsert)
+    if (isUiThread()) notifyItemRangeInserted(position, rangeToInsert.size)
     """.trimIndent())
                 .build()
 

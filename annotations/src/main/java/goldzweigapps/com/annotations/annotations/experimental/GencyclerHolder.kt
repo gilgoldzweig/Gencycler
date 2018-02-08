@@ -1,5 +1,6 @@
 package goldzweigapps.com.annotations.annotations.experimental
 
+import goldzweigapps.com.annotations.annotations.GencyclerViewImpl
 import goldzweigapps.com.annotations.interfaces.GencyclerDataType
 import kotlin.reflect.KClass
 

@@ -4,8 +4,7 @@ import com.squareup.kotlinpoet.*
 import goldzweigapps.com.annotations.annotations.*
 import goldzweigapps.com.annotations.annotations.experimental.GencyclerHolder
 import goldzweigapps.com.annotations.annotations.experimental.GencyclerHolderImpl
-import goldzweigapps.com.compiler.generators.Generator
-import goldzweigapps.com.compiler.generators.experimental.Generators
+import goldzweigapps.com.compiler.generators.Generators
 import goldzweigapps.com.compiler.generators.generateExtensionClass
 import goldzweigapps.com.compiler.utils.*
 import java.io.File
@@ -64,7 +63,6 @@ class GencyclerProcessor : AbstractProcessor() {
         }
         holdersMap.forEach {
             startXMLClassConstriction(ClassName.bestGuess(it.key).simpleName(), it.value.map {
-                goldzweigapps.com.annotations.annotations.
                         GencyclerHolderImpl(it.layoutName,
                                 parseLayoutFileHack(it.layoutName),
                                 it.dataType,
@@ -79,47 +77,17 @@ class GencyclerProcessor : AbstractProcessor() {
         return false
     }
 
-    private fun startClassConstriction(name: String, viewHolders: List<GencyclerViewHolderImpl>) {
-        val generator = Generator(viewHolders)
-        val classBuilder = TypeSpec.classBuilder(name)
-                .addModifiers(KModifier.ABSTRACT)
-                .primaryConstructor(FunSpec.constructorBuilder()
-                        .addParameter(ParameterSpec.builder("val context", context).build())
-                        .addParameter(ParameterSpec.builder("var elementList", elements)
-                                .defaultValue("ArrayList()").build())
-                        .build())
-                .superclass(recyclerAdapterExtensionImpl)
-                .addSuperclassConstructorParameter("elementList")
-                .addProperty(LayoutInflaterProperty)
-        if (viewHolders.isNotEmpty()) {
-            with(generator) {
-                classBuilder.addFunction(generateOnCreateViewHolder())
-                classBuilder.addFunction(generateOnBindViewHolder())
-                classBuilder.addFunction(generateItemCount())
-                classBuilder.addFunction(generateItemViewType())
-                classBuilder.addFunctions(generateOnBindAbstractViewHolder())
-                classBuilder.addTypes(generateViewHolders())
-            }
-        }
-
-        FileSpec.builder(PACKAGE_NAME, name)
-                .addType(classBuilder.build())
-                .indent("   ")
-                .build()
-                .writeTo(File(EnvironmentUtil.savePath()).toPath())
-    }
-
     private fun startXMLClassConstriction(name: String, viewHolders: List<goldzweigapps.com.annotations.annotations.GencyclerHolderImpl>) {
         val generator = Generators(viewHolders)
         val classBuilder = TypeSpec.classBuilder(name)
                 .addModifiers(KModifier.ABSTRACT)
                 .primaryConstructor(FunSpec.constructorBuilder()
                         .addParameter(ParameterSpec.builder("val context", context).build())
-                        .addParameter(ParameterSpec.builder("var elementList", elements)
+                        .addParameter(ParameterSpec.builder("elements", elements)
                                 .defaultValue("ArrayList()").build())
                         .build())
                 .superclass(recyclerAdapterExtensionImpl)
-                .addSuperclassConstructorParameter("elementList")
+                .addSuperclassConstructorParameter("elements")
                 .addProperty(LayoutInflaterProperty)
         if (viewHolders.isNotEmpty()) {
             with(generator) {
@@ -144,17 +112,7 @@ class GencyclerProcessor : AbstractProcessor() {
     override fun getSupportedAnnotationTypes(): Set<String> =
             setOf(GencyclerAdapter::class.java.canonicalName, GencyclerHolder::class.java.canonicalName)
 
-    private fun GencyclerViewHolder.parseClass(): String = try {
-        classType.java.canonicalName
-    } catch (mte: MirroredTypeException) {
-        mte.typeMirror.toString()
-    }
 
-    private fun GencyclerViewField.parseClass(): String = try {
-        viewType.java.canonicalName
-    } catch (mte: MirroredTypeException) {
-        mte.typeMirror.toString()
-    }
 
     private fun GencyclerAdapter.parseRClass(): String = try {
         rClass.java.canonicalName
@@ -170,20 +128,6 @@ class GencyclerProcessor : AbstractProcessor() {
                 mre.typeMirrors.map { it.toString() }
             }
 
-    private fun Array<out GencyclerViewField>.mapToImpl() =
-            map {
-                GencyclerViewFieldImpl(it.name,
-                        it.resId,
-                        it.parseClass())
-            }
-                    .toTypedArray()
-
-    private fun Array<out GencyclerViewHolder>.mapToImpl() =
-            map {
-                GencyclerViewHolderImpl(it.layoutResId,
-                        *it.viewFields.mapToImpl(),
-                        classType = it.parseClass())
-            }
 
     @Throws(Exception::class)
     private fun findLayouts(): File {
@@ -273,47 +217,3 @@ class GencyclerProcessor : AbstractProcessor() {
     }
 }
 
-//region Iterable
-fun <T, E> E.asIterable(hasNext: E.() -> Boolean, next: E.() -> T) =
-        object : Iterable<T> {
-            override fun iterator(): Iterator<T> {
-                return object : Iterator<T> {
-                    override fun hasNext() = hasNext(this@asIterable)
-                    override fun next() = next(this@asIterable)
-                }
-            }
-        }
-
-fun <T, E> E.asIterable(hasNext: Boolean, next: (it: E) -> T) =
-        object : Iterable<T> {
-            override fun iterator(): Iterator<T> {
-                return object : Iterator<T> {
-                    override fun hasNext() = hasNext
-                    override fun next() = next(this@asIterable)
-                }
-            }
-        }
-
-fun <T, E> E.asIterableIndexed(hasNext: E.(index: Int) -> Boolean,
-                               next: E.(index: Int) -> T,
-                               changeOnNext: (index: Int) -> Int): Iterable<T> {
-    var index = 0
-    return object : Iterable<T> {
-        override fun iterator(): Iterator<T> {
-            return object : Iterator<T> {
-                override fun hasNext() = this@asIterableIndexed.hasNext(index)
-                override fun next(): T {
-                    val element = this@asIterableIndexed.next(index)
-                    index = changeOnNext(index)
-                    return element
-                }
-            }
-        }
-    }
-}
-
-fun <T, E> E.asIterableIndexed(hasNext: Boolean,
-                               next: E.(index: Int) -> T,
-                               changeOnNext: (index: Int) -> Int) =
-        asIterableIndexed({ hasNext }, next, changeOnNext)
-//endregion Iterable
