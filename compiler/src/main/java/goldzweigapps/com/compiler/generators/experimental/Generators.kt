@@ -2,15 +2,11 @@ package goldzweigapps.com.compiler.generators.experimental
 
 import com.squareup.kotlinpoet.*
 import goldzweigapps.com.annotations.annotations.GencyclerHolderImpl
-import goldzweigapps.com.annotations.annotations.GencyclerViewHolderImpl
-import goldzweigapps.com.annotations.annotations.experimental.GencyclerHolder
 import goldzweigapps.com.annotations.interfaces.GencyclerDataType
 import goldzweigapps.com.compiler.utils.*
 import java.io.IOException
 
-/**
- * Created by gilgoldzweig on 25/10/2017.
- */
+
 class Generators(private val viewHolders: List<GencyclerHolderImpl>) {
     //region abstract adapter methods
     fun generateOnCreateViewHolder(): FunSpec {

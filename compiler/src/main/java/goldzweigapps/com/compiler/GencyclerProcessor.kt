@@ -25,10 +25,6 @@ import kotlin.collections.HashMap
  * Created by gilgoldzweig on 14/10/2017.
  */
 
-/**
- * Created by gilgoldzweig on 12/10/2017.
- */
-
 class GencyclerProcessor : AbstractProcessor() {
     var holdersMap = HashMap<String, List<GencyclerHolderImpl>>()
     lateinit var rClass: String
