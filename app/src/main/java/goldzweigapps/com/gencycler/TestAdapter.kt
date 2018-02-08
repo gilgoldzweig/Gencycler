@@ -10,7 +10,7 @@ import goldzweigapps.com.annotations.annotations.GencyclerAdapter
 //import goldzweigapps.com.annotations.annotations.GencyclerViewField
 //import goldzweigapps.com.annotations.annotations.experimental.GencyclerHolder
 import goldzweigapps.com.annotations.interfaces.GencyclerDataType
-import goldzweigapps.com.gencycler.adapters.SomeClass
+import goldzweigapps.com.gencycler.adapters.GeneratedSomeClass
 
 //import goldzweigapps.com.gencycler.adapters.GencyclerBrandNewAdpapter
 
@@ -20,7 +20,7 @@ import goldzweigapps.com.gencycler.adapters.SomeClass
  */
 
 @GencyclerAdapter(R::class)
-class SomeClass(context: Context, elements: ArrayList<GencyclerDataType>): SomeClass(context, elements) {
+class SomeClass(context: Context, elements: ArrayList<GencyclerDataType>): GeneratedSomeClass(context, elements) {
     override fun ProfileTypeViewHolder.onBindProfileTypeViewHolder(position: Int, element: ProfileType) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }

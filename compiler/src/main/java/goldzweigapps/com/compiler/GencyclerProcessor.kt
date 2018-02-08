@@ -28,6 +28,20 @@ class GencyclerProcessor : AbstractProcessor() {
     var holdersMap = HashMap<String, List<GencyclerHolderImpl>>()
     lateinit var rClass: String
     var round = -1
+    val layoutFile: File by lazy {
+        val filer = processingEnv.filer
+        val dummySourceFile = filer.createSourceFile("dummy${System.currentTimeMillis()}")
+        var dummySourceFilePath = dummySourceFile.toUri().toString()
+        if (dummySourceFilePath.startsWith("file:")) {
+            if (!dummySourceFilePath.startsWith("file://")) {
+                dummySourceFilePath = dummySourceFilePath.substring("file:".length)
+            }
+        }
+        val dummyFile = File(dummySourceFilePath)
+        val projectRoot = dummyFile.parentFile.parentFile.parentFile.parentFile.parentFile.parentFile
+        File("${projectRoot.absoluteFile}/src/main/res/layout")
+    }
+
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnvironment: RoundEnvironment?): Boolean {
         if (roundEnvironment == null) return true
         if (annotations == null) return true
@@ -79,7 +93,7 @@ class GencyclerProcessor : AbstractProcessor() {
 
     private fun startXMLClassConstriction(name: String, viewHolders: List<goldzweigapps.com.annotations.annotations.GencyclerHolderImpl>) {
         val generator = Generators(viewHolders)
-        val classBuilder = TypeSpec.classBuilder(name)
+        val classBuilder = TypeSpec.classBuilder("Generated$name")
                 .addModifiers(KModifier.ABSTRACT)
                 .primaryConstructor(FunSpec.constructorBuilder()
                         .addParameter(ParameterSpec.builder("val context", context).build())
@@ -100,7 +114,7 @@ class GencyclerProcessor : AbstractProcessor() {
             }
         }
 
-        FileSpec.builder(PACKAGE_NAME, name)
+        FileSpec.builder(PACKAGE_NAME, "Generated$name")
                 .addType(classBuilder.build())
                 .indent("   ")
                 .build()
@@ -129,25 +143,8 @@ class GencyclerProcessor : AbstractProcessor() {
             }
 
 
-    @Throws(Exception::class)
-    private fun findLayouts(): File {
-        return lazy {
-            val filer = processingEnv.filer
-            val dummySourceFile = filer.createSourceFile("dummy${System.currentTimeMillis()}")
-            var dummySourceFilePath = dummySourceFile.toUri().toString()
-            if (dummySourceFilePath.startsWith("file:")) {
-                if (!dummySourceFilePath.startsWith("file://")) {
-                    dummySourceFilePath = dummySourceFilePath.substring("file:".length)
-                }
-            }
-            val dummyFile = File(dummySourceFilePath)
-            val projectRoot = dummyFile.parentFile.parentFile.parentFile.parentFile.parentFile.parentFile
-            File("${projectRoot.absoluteFile}/src/main/res/layout")
-        }.value
-    }
-
     private fun parseLayoutFileHack(fileName: String): List<GencyclerViewImpl> {
-        val layouts = findLayouts().listFiles()
+        val layouts = layoutFile.listFiles()
         val layoutFile = try {
             layouts.firstOrNull { it.nameWithoutExtension == fileName }
         } catch (e: Exception) {
