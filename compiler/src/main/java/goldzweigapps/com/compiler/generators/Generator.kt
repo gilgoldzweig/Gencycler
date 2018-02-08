@@ -133,6 +133,9 @@ val element = ParameterSpec.builder("element", GencyclerDataType::class)
 
 val elementList = ParameterSpec.builder("elementList", elementsList)
         .build()
+
+val elementArrayList = ParameterSpec.builder("elementList", elements)
+        .build()
 //endregion helper fields
 //region utils
 private fun <T> T.same(func: () -> Any) = also { func.invoke() }
@@ -152,9 +155,9 @@ private fun String.removeLastChars(countFromEnd: Int) = if (length > countFromEn
 private fun generateSetItemsFunction() =
         FunSpec.builder("setItems")
                 .addModifiers(KModifier.OPEN)
-                .addParameter(elementList)
+                .addParameter(elementArrayList)
                 .addStatement("""
-                    $elementsConst = ArrayList(elementList)
+                    $elementsConst = elementList
                     if (isUiThread()) notifyDataSetChanged()
                     """.trimIndent())
                 .build()
@@ -186,7 +189,7 @@ private fun generateAddRangeFunction() =
                 .addParameter(positionWithDefault)
                 .addStatement("""
     $elementsConst.addAll(position, rangeToInsert)
-    if (isUiThread()) notifyItemInserted(position)
+    if (isUiThread()) notifyItemRangeInserted(position, rangeToInsert.size)
     """.trimIndent())
                 .build()
 
