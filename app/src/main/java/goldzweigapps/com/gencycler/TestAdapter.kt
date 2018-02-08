@@ -2,6 +2,7 @@ package goldzweigapps.com.gencycler
 
 import android.content.Context
 import goldzweigapps.com.annotations.annotations.GencyclerAdapter
+import goldzweigapps.com.annotations.annotations.experimental.GencyclerHolder
 //import android.support.v7.widget.AppCompatImageView
 //import android.support.v7.widget.AppCompatTextView
 //import goldzweigapps.com.annotations.annotations.GencyclerAdapter
@@ -34,3 +35,12 @@ class SomeClass(context: Context, elements: ArrayList<GencyclerDataType>): Gener
 //        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
 //    }
 //}
+
+
+@GencyclerHolder("type_one", SomeClass::class)
+data class ProfileType(
+        val name: String,
+
+        val age: Int,
+
+        val profilePicture: String): GencyclerDataType

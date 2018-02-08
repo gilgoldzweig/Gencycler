@@ -7,6 +7,7 @@ import goldzweigapps.com.annotations.annotations.experimental.GencyclerHolderImp
 import goldzweigapps.com.compiler.generators.Generators
 import goldzweigapps.com.compiler.generators.generateExtensionClass
 import goldzweigapps.com.compiler.utils.*
+import org.w3c.dom.Node
 import java.io.File
 import java.util.*
 import javax.annotation.processing.AbstractProcessor
@@ -160,21 +161,30 @@ class GencyclerProcessor : AbstractProcessor() {
             val nodes = element.childNodes
             for (i in 0 until nodes.length) {
                 val node = nodes.item(i)
-                if (node.hasAttributes() && node.attributes.getNamedItem("android:id") != null) {
-                    with(node.attributes) {
-                        val id = getNamedItem("android:id").nodeValue
-                        val viewType = findViewType(node.nodeName)
-                        val fieldName = id.convertIdStringToFieldName()
-                        val resId = id.removeIdStringPrefix()
-                        val view = GencyclerViewImpl(fieldName,
-                                resId,
-                                viewType)
-                        views += view
-                    }
-                }
+                buildViewFromNode(views, node)
             }
         }
         return views
+    }
+    private fun buildViewFromNode(views: ArrayList<GencyclerViewImpl>, node: Node) {
+        if (node.hasAttributes() && node.attributes.getNamedItem("android:id") != null) {
+            with(node.attributes) {
+                val id = getNamedItem("android:id").nodeValue
+                val viewType = findViewType(node.nodeName)
+                val fieldName = id.convertIdStringToFieldName()
+                val resId = id.removeIdStringPrefix()
+                val view = GencyclerViewImpl(fieldName,
+                        resId,
+                        viewType)
+                views += view
+            }
+        }
+        if (node.hasChildNodes()) {
+            val nodes = node.childNodes
+            for (i in 0 until nodes.length) {
+                buildViewFromNode(views, nodes.item(i))
+            }
+        }
     }
 
     private fun findViewType(nodeName: String): String {
