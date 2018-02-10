@@ -1,13 +1,13 @@
 package goldzweigapps.com.compiler.generators
 
 import com.squareup.kotlinpoet.*
-import goldzweigapps.com.annotations.annotations.GencyclerHolderImpl
-import goldzweigapps.com.annotations.interfaces.GencyclerDataType
+import goldzweigapps.com.annotations.annotations.GencyclerDataType
+import goldzweigapps.com.compiler.models.ViewHolder
 import goldzweigapps.com.compiler.utils.*
 import java.io.IOException
 
 
-class Generators(private val viewHolders: List<GencyclerHolderImpl>) {
+class Generators(private val rClass: ClassName, private val viewHolders: List<ViewHolder>) {
     //region abstract adapter methods
     fun generateOnCreateViewHolder(): FunSpec {
 
@@ -16,15 +16,18 @@ class Generators(private val viewHolders: List<GencyclerHolderImpl>) {
                 .addParameter("viewType", Int::class)
                 .returns(RecyclerViewViewHolder)
                 .addModifiers(KModifier.OVERRIDE)
+
         val layoutSwitch = CodeBlock.builder()
+
         layoutSwitch.add("return when(viewType) {")
+
         var supportedTypes = ""
         for (holder in viewHolders) {
             val dataType = ClassName.bestGuess(holder.classType)
-            var rClass = ClassName.bestGuess(holder.rClass)
             supportedTypes += "${dataType.simpleName()}, "
             layoutSwitch.add("\n        %T.layout.${holder.layoutName} -> ${dataType.simpleName()}$METHOD_VIEW_HOLDER_CUSTOM(inflater.inflate(viewType, parent, false))", rClass)
         }
+
         supportedTypes = supportedTypes.removeLastChars(2)
         layoutSwitch.add("\n        else -> throw %T(\"unsupported type, only ($supportedTypes) are supported\")",
                 IOException::class.asClassName())
@@ -45,10 +48,11 @@ class Generators(private val viewHolders: List<GencyclerHolderImpl>) {
             val dataType = ClassName.bestGuess(holder.classType)
             layoutSwitch.add("""
 
-                is ${dataType.simpleName()}${METHOD_VIEW_HOLDER_CUSTOM} ->
-                        holder.${METHOD_BIND_CUSTOM}${dataType.simpleName()}${METHOD_VIEW_HOLDER_CUSTOM}(position, elements[position] as ${dataType.simpleName()})
+                is ${dataType.simpleName()}$METHOD_VIEW_HOLDER_CUSTOM ->
+                        holder.$METHOD_BIND_CUSTOM${dataType.simpleName()}$METHOD_VIEW_HOLDER_CUSTOM(position, elements[position] as ${dataType.simpleName()})
 
             """.trimIndent())
+
         }
         layoutSwitch.add("\n}\n")
         getItemViewType.addCode(layoutSwitch.build())
@@ -118,6 +122,7 @@ class Generators(private val viewHolders: List<GencyclerHolderImpl>) {
     }
     //endregion abstract adapter methods
 }
+
 //region helper fields
 val elementsConst = "elements"
 
@@ -132,9 +137,11 @@ val element = ParameterSpec.builder("element", GencyclerDataType::class)
 
 val elementList = ParameterSpec.builder("elementList", elements)
         .build()
+
 //endregion helper fields
 //region utils
 private fun <T> T.same(func: () -> Any) = also { func.invoke() }
+
 private fun FunSpec.Builder.addElementWithPosition(withDefault: Boolean = true) = same {
     addParameter(element)
     if (withDefault) {
@@ -144,8 +151,10 @@ private fun FunSpec.Builder.addElementWithPosition(withDefault: Boolean = true) 
     }
 
 }
+
 private fun String.removeLastChars(countFromEnd: Int) = if (length > countFromEnd)
     removeRange(length - countFromEnd, length) else this
+
 //endregion utils
 //region adapter extension methods
 private fun generateSetItemsFunction() =
@@ -154,7 +163,7 @@ private fun generateSetItemsFunction() =
                 .addParameter(elementList)
                 .addStatement("""
                     $elementsConst = elementList
-                    if (isUiThread()) notifyDataSetChanged()
+                    if (isUiThread()) notifyDataSetChanged() else throw Throwable("Trying to update the RecyclerView adapter not on main thread")
                     """.trimIndent())
                 .build()
 
@@ -163,8 +172,8 @@ private fun generateSetItemFunction() =
                 .addModifiers(KModifier.OPEN)
                 .addElementWithPosition(false)
                 .addStatement("""
-                        ${elementsConst}[position] = element
-                        if (isUiThread()) notifyItemChanged(position)
+                        $elementsConst[position] = element
+                        if (isUiThread()) notifyItemChanged(position) else throw Throwable("Trying to update the RecyclerView adapter not on main thread")
                         """.trimIndent())
                 .build()
 
@@ -174,7 +183,7 @@ private fun generateAddFunction() =
                 .addElementWithPosition()
                 .addStatement("""
                     ${elementsConst}.add(position, element)
-                    if (isUiThread()) notifyItemInserted(position)
+                    if (isUiThread()) notifyItemInserted(position) else throw Throwable("Trying to update the RecyclerView adapter not on main thread")
                     """.trimIndent())
                 .build()
 
@@ -185,7 +194,7 @@ private fun generateAddRangeFunction() =
                 .addParameter(positionWithDefault)
                 .addStatement("""
     ${elementsConst}.addAll(position, rangeToInsert)
-    if (isUiThread()) notifyItemRangeInserted(position, rangeToInsert.size)
+    if (isUiThread()) notifyItemRangeInserted(position, rangeToInsert.size) else throw Throwable("Trying to update the RecyclerView adapter not on main thread")
     """.trimIndent())
                 .build()
 
@@ -196,7 +205,7 @@ private fun generateRemoveRangeFunction() =
                 .addStatement("""
                  val startPosition = elements.indexOf(itemsToRemove[0])
                  elements.removeAll(itemsToRemove)
-                 if (isUiThread()) notifyItemRangeRemoved(startPosition, itemsToRemove.size)
+                 if (isUiThread()) notifyItemRangeRemoved(startPosition, itemsToRemove.size) else throw Throwable("Trying to update the RecyclerView adapter not on main thread")
             """.trimIndent())
                 .build()
 
@@ -215,7 +224,7 @@ private fun generateRemoveElementFunction() =
                      val removePosition = elements.indexOf(itemToRemove)
                      if (removePosition != -1) {
                          elements.removeAt(removePosition)
-                     if (isUiThread()) notifyItemRemoved(removePosition)
+                     if (isUiThread()) notifyItemRemoved(removePosition) else throw Throwable("Trying to update the RecyclerView adapter not on main thread")
         }
                 """.trimIndent())
                 .build()
@@ -227,7 +236,7 @@ private fun generateRemovePositionFunction() =
                 .addStatement("""
                        if (removePosition != -1) {
                             elements.removeAt(removePosition)
-                            if (isUiThread()) notifyItemRemoved(removePosition)
+                            if (isUiThread()) notifyItemRemoved(removePosition) else throw Throwable("Trying to update the RecyclerView adapter not on main thread")
                        }
                 """.trimIndent())
                 .build()
@@ -237,7 +246,7 @@ private fun generateClearFunction() =
                 .addModifiers(KModifier.OPEN)
                 .addStatement("""
                     elements.clear()
-                    if (isUiThread()) notifyDataSetChanged()
+                    if (isUiThread()) notifyDataSetChanged() else throw Throwable("Trying to update the RecyclerView adapter not on main thread")
                 """.trimIndent())
                 .build()
 

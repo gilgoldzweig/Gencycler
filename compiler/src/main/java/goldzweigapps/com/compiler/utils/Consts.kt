@@ -4,14 +4,14 @@ import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterizedTypeName
 import com.squareup.kotlinpoet.PropertySpec
-import goldzweigapps.com.annotations.interfaces.GencyclerDataType
+import goldzweigapps.com.annotations.annotations.GencyclerDataType
 
 
 /**
  * Created by gilgoldzweig on 14/10/2017.
  */
 internal const val FILE_NAME_ADDON = "Gencycler"
-internal const val PACKAGE_NAME = "goldzweigapps.com.gencycler.adapters"
+internal const val PACKAGE_NAME = "goldzweigapps.com.gencycler.recyclerAdapters"
 
 internal val METHOD_GET_VIEW_TYPE_NAME = "getItemViewType"
 internal val METHOD_CREATE_VIEW_HOLDER = "onCreateViewHolder"

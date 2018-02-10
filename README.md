@@ -1,6 +1,15 @@
 # Gencycler
 
-### Gencycler is a compile time annotation processor, that writes the RecyclerView adapter code for you.
+### Gencycler is a compile time annotation processor,
+that generate your RecyclerView adapter with a thread-safe accessing mechanism.
+
+Gencycler eliminates The
+
+
+
+
+
+
 
 The adapter gives you a thread-safe way to access the elements just like a list.
 It does that by using extension functions like add, in(contains), remove, and much more(Look below to see full function list)
@@ -134,7 +143,7 @@ In order for the adapter to decide when each type is inflated and at what time y
  More functions and features will come in the future follow me on GitHub and receive updates as soon as I make them.
 
 
-MIT License
+`MIT License
 
 Copyright (c) 2017 Gil Goldzweig
 
@@ -154,4 +163,4 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+SOFTWARE.`

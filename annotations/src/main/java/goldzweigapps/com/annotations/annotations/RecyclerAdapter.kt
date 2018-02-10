@@ -7,4 +7,4 @@ import kotlin.reflect.KClass
  *
  */
 @Retention(AnnotationRetention.SOURCE)
-annotation class GencyclerAdapter(val rClass: KClass<*>)
+annotation class RecyclerAdapter(val rClass: KClass<*>, val customName: String = "")
