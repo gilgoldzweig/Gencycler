@@ -18,7 +18,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
 //        classpath 'gencycler.properties'
-//        classpath "com.github.gilgoldzweig.Gencycler:plugin:1.2.20000"
+        classpath "com.github.gilgoldzweig.Gencycler:plugin:plugin-SNAPSHOT"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
