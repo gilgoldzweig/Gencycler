@@ -10,6 +10,7 @@ dependencies {
     compile "com.github.javaparser:javaparser-core:3.5.14"
     compile "com.squareup:kotlinpoet:$kotlin_poet"
 }
+
 configurations {
     fixtureClasspath
 }
