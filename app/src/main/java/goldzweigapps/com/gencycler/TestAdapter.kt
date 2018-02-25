@@ -14,6 +14,7 @@ import goldzweigapps.com.gencycler.recyclerAdapters.TestAdapter
 @RecyclerAdapter(R::class, "TestAdapter")
 class SomeClass(context: Context, elements: ArrayList<GencyclerDataType>) : TestAdapter(context, elements) {
     override fun ProfileTypeViewHolder.onBindProfileTypeViewHolder(position: Int, element: ProfileType) {
+        R2.id
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

@@ -26,6 +26,17 @@ object FinalRClassBuilder {
     private val SUPPORT_ANNOTATION_PACKAGE = "android.support.annotation"
     private val SUPPORTED_TYPES = arrayOf("anim", "array", "attr", "bool", "color", "dimen", "drawable", "id", "integer", "layout", "menu", "plurals", "string", "style", "styleable")
 
+   private var idMapPropertyBuilder = PropertySpec.builder("idMap",
+            ParameterizedTypeName.get(Map::class, String::class, Int::class),
+            KModifier.FINAL, KModifier.PUBLIC)
+    private var idMap = HashMap<String, Int>()
+
+    private var nameMapPropertyBuilder = PropertySpec.builder("nameMap",
+            ParameterizedTypeName.get(Map::class, Int::class, String::class),
+            KModifier.FINAL, KModifier.PUBLIC)
+
+    private var nameMap = HashMap<Int, String>()
+
     @Throws(Exception::class)
     fun brewJava(rFile: File, outputDir: File, packageName: String, className: String) {
         val compilationUnit = JavaParser.parse(rFile)
@@ -33,7 +44,6 @@ object FinalRClassBuilder {
 
         val result = TypeSpec.objectBuilder(className)
                 .addModifiers(KModifier.PUBLIC)
-                .addModifiers(KModifier.FINAL)
 
         for (node in resourceClass.childNodes) {
             if (node is ClassOrInterfaceDeclaration) {
@@ -41,7 +51,7 @@ object FinalRClassBuilder {
             }
         }
         val finalR = FileSpec.builder(packageName, className)
-                .addComment("Generated code from Butter Knife gradle plugin. Do not modify!")
+                .addComment("Generated code from Gencycler gradle plugin. Do not modify!")
                 .addType(result.build())
                 .build()
 
@@ -55,7 +65,7 @@ object FinalRClassBuilder {
         }
 
         val type = node.nameAsString
-        val resourceType = TypeSpec.classBuilder(type).addModifiers(KModifier.PUBLIC, KModifier.FINAL)
+        val resourceType = TypeSpec.objectBuilder(type).addModifiers(KModifier.PUBLIC, KModifier.FINAL)
 
         for (field in node.members) {
             if (field is FieldDeclaration) {
@@ -67,7 +77,8 @@ object FinalRClassBuilder {
                 }
             }
         }
-
+        result.addProperty(idMapPropertyBuilder.initializer("mapOf(%E)", idMap.map { "${it.key} to ${it.value}" }.joinToString()).build())
+        result.addProperty(nameMapPropertyBuilder.initializer("mapOf(%E)", nameMap.map { "${it.key} to ${it.value}" }.joinToString()).build())
         result.addType(resourceType.build())
     }
 
@@ -80,9 +91,12 @@ object FinalRClassBuilder {
                                  annotation: ClassName?) {
         val fieldName = variable.nameAsString
         val fieldValue = variable.initializer.map { it.toString() }.orElse(null)
+        idMap[fieldName] = fieldValue.toInt()
+        nameMap[fieldValue.toInt()] = fieldName
+
         val fieldSpecBuilder = PropertySpec.builder(fieldName,
                 Int::class,
-                KModifier.PUBLIC, KModifier.FINAL)
+                KModifier.PUBLIC)
                 .initializer(fieldValue)
 
         if (annotation != null) {
