@@ -1,5 +1,6 @@
 package goldzweigapps.com.annotations.annotations
 
+import android.support.annotation.LayoutRes
 import kotlin.reflect.KClass
 
 /**
@@ -9,5 +10,6 @@ import kotlin.reflect.KClass
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.CLASS)
 annotation class Holder(val layoutName: String,
+                        @LayoutRes val layoutRes: Int,
                         vararg val recyclerAdapters: KClass<out Any>)
 

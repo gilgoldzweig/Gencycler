@@ -1,0 +1,23 @@
+apply plugin: 'java-gradle-plugin'
+apply plugin: 'kotlin'
+apply plugin: 'com.github.dcendents.android-maven'
+group='com.github.gilgoldzweig'
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compileOnly gradleApi()
+    compile 'com.android.tools.build:gradle:3.0.1'
+    compile "com.github.javaparser:javaparser-core:3.5.14"
+    compile "com.squareup:kotlinpoet:$kotlin_poet"
+}
+configurations {
+    fixtureClasspath
+}
+// Append any extra dependencies to the test fixtures via a custom configuration classpath. This
+// allows us to apply additional plugins in a fixture while still leveraging dependency resolution
+// and de-duplication semantics.
+def metadata = tasks.getByName('pluginUnderTestMetadata')
+metadata.setPluginClasspath(metadata.getPluginClasspath() + configurations.fixtureClasspath)
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"

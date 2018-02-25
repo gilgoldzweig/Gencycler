@@ -5,7 +5,7 @@ import goldzweigapps.com.annotations.annotations.GencyclerDataType
 import goldzweigapps.com.annotations.annotations.Holder
 import goldzweigapps.com.annotations.annotations.RecyclerAdapter
 import goldzweigapps.com.gencycler.recyclerAdapters.TestAdapter
-
+//
 
 /**
  * Created by gilgoldzweig on 14/10/2017.
@@ -28,7 +28,7 @@ class SomeClass(context: Context, elements: ArrayList<GencyclerDataType>) : Test
 //}
 
 
-@Holder("type_one", SomeClass::class)
+@Holder("type_one", R.layout.type_one, SomeClass::class)
 data class ProfileType(
         val name: String,
 

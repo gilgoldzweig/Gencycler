@@ -8,8 +8,9 @@ import goldzweigapps.com.compiler.generators.generateExtensionClass
 import goldzweigapps.com.compiler.models.ViewHolder
 import goldzweigapps.com.compiler.parser.XMLParser
 import goldzweigapps.com.compiler.utils.*
-import org.w3c.dom.Node
+import org.w3c.dom.Document
 import java.io.File
+import java.io.StringWriter
 import java.util.*
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.ProcessingEnvironment
@@ -19,8 +20,13 @@ import javax.lang.model.element.TypeElement
 import javax.lang.model.type.MirroredTypeException
 import javax.lang.model.type.MirroredTypesException
 import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.transform.OutputKeys
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.dom.DOMSource
+import javax.xml.transform.stream.StreamResult
+import com.squareup.kotlinpoet.ClassName
 
 
 /**
@@ -45,6 +51,19 @@ class GencyclerProcessor : AbstractProcessor() {
         val projectRoot = dummyFile.parentFile.parentFile.parentFile.parentFile.parentFile.parentFile
         File("${projectRoot.absoluteFile}/src/main/res/layout")
     }
+    val manifestFile: File by lazy {
+        val filer = processingEnv.filer
+        val dummySourceFile = filer.createSourceFile("dummy${System.currentTimeMillis()}")
+        var dummySourceFilePath = dummySourceFile.toUri().toString()
+        if (dummySourceFilePath.startsWith("file:")) {
+            if (!dummySourceFilePath.startsWith("file://")) {
+                dummySourceFilePath = dummySourceFilePath.substring("file:".length)
+            }
+        }
+        val dummyFile = File(dummySourceFilePath)
+        val projectRoot = dummyFile.parentFile.parentFile.parentFile.parentFile.parentFile.parentFile
+        File("${projectRoot.absoluteFile}/src/main/AndroidManifest.xml")
+    }
 
     override fun init(p0: ProcessingEnvironment?) {
         super.init(p0)
@@ -59,6 +78,26 @@ class GencyclerProcessor : AbstractProcessor() {
 
         if (!initialized) EnvironmentUtil.init(processingEnv)
         initialized = true
+        val factory = DocumentBuilderFactory.newInstance()
+        val builder = factory.newDocumentBuilder()
+        val doc = builder.parse(manifestFile)
+        val element = doc.documentElement
+
+        val attributes = element.attributes
+        for (i in 0 until attributes.length) {
+            val node = attributes.item(i)
+            val name = node.nodeName
+            val value = node.nodeValue
+            if (name == "package") {
+
+//                EnvironmentUtil.logWarning()
+//                EnvironmentUtil.typeUtils()?.toString()
+//                trees.getElement()
+//                RClassScanner(value).
+//                EnvironmentUtil.logWarning(rClazz.classes.toString())
+            }
+            EnvironmentUtil.logWarning("$name=$value")
+        }
 
         generateExtensionClass()
                 .writeTo(File(EnvironmentUtil.savePath()).toPath())
@@ -77,12 +116,14 @@ class GencyclerProcessor : AbstractProcessor() {
                 return true
             }
         }
+//        val fields = Class.forName(rClass + ".layout").fields
 
         for (holderElement in roundEnvironment.getElementsAnnotatedWith(Holder::class.java)) {
 
             val xmlParser = XMLParser(layoutFile, classType = holderElement.asType().toString())
             val holder = holderElement.getAnnotation(Holder::class.java)
 
+//            EnvironmentUtil.logWarning(fields.firstOrNull { it.get(Any()) == holder.layoutRes }?.name ?: "no field")
             holder
                     .parseClasss()
                     .forEach {
@@ -173,6 +214,46 @@ class GencyclerProcessor : AbstractProcessor() {
             } catch (mre: MirroredTypesException) {
                 mre.typeMirrors.map { it.toString() }
             }
+
+    fun toString(doc: Document): String {
+        try {
+            val sw = StringWriter()
+            val tf = TransformerFactory.newInstance()
+            val transformer = tf.newTransformer()
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no")
+            transformer.setOutputProperty(OutputKeys.METHOD, "xml")
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes")
+            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8")
+
+            transformer.transform(DOMSource(doc), StreamResult(sw))
+            return sw.toString()
+        } catch (ex: Exception) {
+            throw RuntimeException("Error converting to String", ex)
+        }
+
+    }
+
+
+//    private class RClassScanner(var currentPackageName: String) : TreeScanner() {
+//        // Maps the currently evaulated rPackageName to R Classes
+//        val rClasses = LinkedHashMap<String, Set<String>>()
+//
+//        override fun visitSelect(jcFieldAccess: JCTree.JCFieldAccess) {
+//            val symbol = jcFieldAccess.sym
+//            if (symbol != null
+//                    && symbol.enclosingElement != null
+//                    && symbol.enclosingElement.enclosingElement != null
+//                    && symbol.enclosingElement.enclosingElement.enclClass() != null) {
+//                var rClassSet: MutableSet<String>? = rClasses.get(currentPackageName)
+//                if (rClassSet == null) {
+//                    rClassSet = HashSet()
+//                    rClasses[currentPackageName] = rClassSet
+//                }
+//                rClassSet.add(symbol.enclosingElement.enclosingElement.enclClass().className())
+//            }
+//        }
+//
+//    }
 
 }
 
