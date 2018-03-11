@@ -1,11 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'goldzweigapps.com.gencycler'
-
-kapt {
-    generateStubs = true
-}
 
 android {
     compileSdkVersion 26
@@ -44,7 +39,4 @@ dependencies {
     compile "com.android.support:recyclerview-v7:$suppprt"
     kapt project(":compiler")
     compile project(":annotations")
-//    kapt "com.github.gilgoldzweig.Gencycler:compiler:1.2.0"
-//    compile "com.github.gilgoldzweig.Gencycler:annotations:1.2.0"
-
 }

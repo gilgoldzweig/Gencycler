@@ -15,8 +15,8 @@ import goldzweigapps.com.gencycler.recyclerAdapters.TestAdapter
 @RecyclerAdapter(R::class, "TestAdapter")
 class SomeClass(context: Context, elements: ArrayList<GencyclerDataType>) : TestAdapter(context, elements) {
     override fun ProfileTypeViewHolder.onBindProfileTypeViewHolder(position: Int, element: ProfileType) {
+
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    R2
     }
 }
 //class TestAdapter(context: Context, elements: ArrayList<GencyclerDataType>): TestAdapter(context, elements) {
@@ -30,7 +30,7 @@ class SomeClass(context: Context, elements: ArrayList<GencyclerDataType>) : Test
 //}
 
 
-@Holder("type_one", R.layout.type_one, SomeClass::class)
+@Holder("R.layout.type_one", R.layout.type_one, SomeClass::class)
 data class ProfileType(
         val name: String,
 

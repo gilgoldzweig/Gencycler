@@ -27,6 +27,8 @@ import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 import com.squareup.kotlinpoet.ClassName
+import javax.lang.model.util.ElementFilter
+import javax.lang.model.type.TypeKind
 
 
 /**
@@ -50,6 +52,7 @@ class GencyclerProcessor : AbstractProcessor() {
         val dummyFile = File(dummySourceFilePath)
         val projectRoot = dummyFile.parentFile.parentFile.parentFile.parentFile.parentFile.parentFile
         File("${projectRoot.absoluteFile}/src/main/res/layout")
+
     }
     val manifestFile: File by lazy {
         val filer = processingEnv.filer
@@ -68,7 +71,6 @@ class GencyclerProcessor : AbstractProcessor() {
     override fun init(p0: ProcessingEnvironment?) {
         super.init(p0)
         if (p0 == null) return
-
     }
 
 
@@ -78,6 +80,7 @@ class GencyclerProcessor : AbstractProcessor() {
 
         if (!initialized) EnvironmentUtil.init(processingEnv)
         initialized = true
+
         val factory = DocumentBuilderFactory.newInstance()
         val builder = factory.newDocumentBuilder()
         val doc = builder.parse(manifestFile)
@@ -89,6 +92,14 @@ class GencyclerProcessor : AbstractProcessor() {
             val name = node.nodeName
             val value = node.nodeValue
             if (name == "package") {
+                val elements = EnvironmentUtil.elementUtils().getTypeElement("$value.R.layout").enclosedElements
+                EnvironmentUtil.logWarning(elements.toString())
+               ElementFilter.fieldsIn(elements)?.forEach {
+                   val fieldType = it.asType().kind
+                   if (fieldType.isPrimitive && fieldType == TypeKind.INT) {
+                       EnvironmentUtil.logWarning("name: ${it.simpleName} value: ${it.constantValue} /n")
+                   }
+               }
 
 //                EnvironmentUtil.logWarning()
 //                EnvironmentUtil.typeUtils()?.toString()
@@ -105,7 +116,6 @@ class GencyclerProcessor : AbstractProcessor() {
         val recyclerAdapterAnnotation = roundEnvironment.getElementsAnnotatedWith(RecyclerAdapter::class.java)
                 .first()
                 .getAnnotation(RecyclerAdapter::class.java)
-
         rClass = try {
             rClass
         } catch (e: UninitializedPropertyAccessException) {
