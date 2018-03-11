@@ -9,7 +9,8 @@ import kotlin.reflect.KClass
 
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.CLASS)
-annotation class Holder(val layoutName: String,
-                        @LayoutRes val layoutRes: Int,
-                        vararg val recyclerAdapters: KClass<out Any>)
-
+@Repeatable
+annotation class Holder(@LayoutRes val layoutRes: Int,
+                        vararg val recyclerAdapters: KClass<out Any>,
+                        val uniqueString: String = "",
+                        val uniqueInt: Int = -1)

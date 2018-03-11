@@ -27,6 +27,7 @@ import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 import com.squareup.kotlinpoet.ClassName
+import goldzweigapps.com.compiler.finder.ManifestFinder
 import javax.lang.model.util.ElementFilter
 import javax.lang.model.type.TypeKind
 
@@ -38,8 +39,6 @@ import javax.lang.model.type.TypeKind
 class GencyclerProcessor : AbstractProcessor() {
 
     var holdersMap = HashMap<String, List<ViewHolder>>()
-    lateinit var rClass: String
-    var initialized = false
     val layoutFile: File by lazy {
         val filer = processingEnv.filer
         val dummySourceFile = filer.createSourceFile("dummy${System.currentTimeMillis()}")
@@ -54,23 +53,18 @@ class GencyclerProcessor : AbstractProcessor() {
         File("${projectRoot.absoluteFile}/src/main/res/layout")
 
     }
-    val manifestFile: File by lazy {
-        val filer = processingEnv.filer
-        val dummySourceFile = filer.createSourceFile("dummy${System.currentTimeMillis()}")
-        var dummySourceFilePath = dummySourceFile.toUri().toString()
-        if (dummySourceFilePath.startsWith("file:")) {
-            if (!dummySourceFilePath.startsWith("file://")) {
-                dummySourceFilePath = dummySourceFilePath.substring("file:".length)
-            }
-        }
-        val dummyFile = File(dummySourceFilePath)
-        val projectRoot = dummyFile.parentFile.parentFile.parentFile.parentFile.parentFile.parentFile
-        File("${projectRoot.absoluteFile}/src/main/AndroidManifest.xml")
-    }
+
+    private lateinit var manifestFinder: ManifestFinder
+    private lateinit var rClass: String
+    private lateinit var valueNameLayoutMap: Map<Int, String>
 
     override fun init(p0: ProcessingEnvironment?) {
         super.init(p0)
         if (p0 == null) return
+        EnvironmentUtil.init(processingEnv)
+        manifestFinder = ManifestFinder(processingEnv)
+        rClass = manifestFinder.findRClass()
+        valueNameLayoutMap = manifestFinder.buildLayoutValueNameMap(rClass)
     }
 
 
@@ -78,37 +72,6 @@ class GencyclerProcessor : AbstractProcessor() {
         if (roundEnvironment == null) return true
         if (annotations == null || annotations.isEmpty()) return true
 
-        if (!initialized) EnvironmentUtil.init(processingEnv)
-        initialized = true
-
-        val factory = DocumentBuilderFactory.newInstance()
-        val builder = factory.newDocumentBuilder()
-        val doc = builder.parse(manifestFile)
-        val element = doc.documentElement
-
-        val attributes = element.attributes
-        for (i in 0 until attributes.length) {
-            val node = attributes.item(i)
-            val name = node.nodeName
-            val value = node.nodeValue
-            if (name == "package") {
-                val elements = EnvironmentUtil.elementUtils().getTypeElement("$value.R.layout").enclosedElements
-                EnvironmentUtil.logWarning(elements.toString())
-               ElementFilter.fieldsIn(elements)?.forEach {
-                   val fieldType = it.asType().kind
-                   if (fieldType.isPrimitive && fieldType == TypeKind.INT) {
-                       EnvironmentUtil.logWarning("name: ${it.simpleName} value: ${it.constantValue} /n")
-                   }
-               }
-
-//                EnvironmentUtil.logWarning()
-//                EnvironmentUtil.typeUtils()?.toString()
-//                trees.getElement()
-//                RClassScanner(value).
-//                EnvironmentUtil.logWarning(rClazz.classes.toString())
-            }
-            EnvironmentUtil.logWarning("$name=$value")
-        }
 
         generateExtensionClass()
                 .writeTo(File(EnvironmentUtil.savePath()).toPath())
@@ -116,17 +79,7 @@ class GencyclerProcessor : AbstractProcessor() {
         val recyclerAdapterAnnotation = roundEnvironment.getElementsAnnotatedWith(RecyclerAdapter::class.java)
                 .first()
                 .getAnnotation(RecyclerAdapter::class.java)
-        rClass = try {
-            rClass
-        } catch (e: UninitializedPropertyAccessException) {
-            try {
-                recyclerAdapterAnnotation.parseRClass()
-            } catch (e: Exception) {
-                EnvironmentUtil.logError("R class not found are you sure you have a @RecyclerAdapter?")
-                return true
-            }
-        }
-//        val fields = Class.forName(rClass + ".layout").fields
+
 
         for (holderElement in roundEnvironment.getElementsAnnotatedWith(Holder::class.java)) {
 
@@ -141,7 +94,7 @@ class GencyclerProcessor : AbstractProcessor() {
                         if (holders == null) {
                             holdersMap[it] = listOf(
                                     try {
-                                        xmlParser.parse(holder.layoutName)
+                                        xmlParser.parse("${valueNameLayoutMap[holder.layoutRes]}")
                                     } catch (e: Exception) {
                                         e.message?.let(EnvironmentUtil::logError)
                                                 ?: e.printStackTrace()
@@ -150,7 +103,7 @@ class GencyclerProcessor : AbstractProcessor() {
                         } else {
                             holdersMap[it] = ArrayList(holders +
                                     try {
-                                        xmlParser.parse(holder.layoutName)
+                                        xmlParser.parse("${valueNameLayoutMap[holder.layoutRes]}")
                                     } catch (e: Exception) {
                                         e.message?.let(EnvironmentUtil::logError)
                                                 ?: e.printStackTrace()
@@ -160,14 +113,14 @@ class GencyclerProcessor : AbstractProcessor() {
                     }
         }
         holdersMap.forEach {
-            startXMLClassConstriction(rClass, if (recyclerAdapterAnnotation.customName.isEmpty())
+            startXMLClassConstriction(if (recyclerAdapterAnnotation.customName.isEmpty())
                 "Generated${ClassName.bestGuess(it.key).simpleName()}" else recyclerAdapterAnnotation.customName, it.value)
         }
 
         return true
     }
 
-    private fun startXMLClassConstriction(rClass: String, name: String, viewHolders: List<ViewHolder>) {
+    private fun startXMLClassConstriction(name: String, viewHolders: List<ViewHolder>) {
         val generator = Generators(ClassName.bestGuess(rClass), viewHolders)
 
         val classBuilder = TypeSpec.classBuilder(name)
@@ -206,11 +159,6 @@ class GencyclerProcessor : AbstractProcessor() {
             setOf(RecyclerAdapter::class.java.canonicalName, Holder::class.java.canonicalName)
 
 
-    private fun RecyclerAdapter.parseRClass(): String = try {
-        rClass.java.canonicalName
-    } catch (mte: MirroredTypeException) {
-        mte.typeMirror.toString()
-    }
 
     private fun NamingAdapter.parseNamingAdapterClass(): String = try {
         adapter.java.canonicalName

@@ -4,6 +4,7 @@ import android.content.Context
 import goldzweigapps.com.annotations.annotations.GencyclerDataType
 import goldzweigapps.com.annotations.annotations.Holder
 import goldzweigapps.com.annotations.annotations.RecyclerAdapter
+import goldzweigapps.com.annotations.annotations.Unique
 import goldzweigapps.com.gencycler.recyclerAdapters.TestAdapter
 
 //
@@ -12,7 +13,7 @@ import goldzweigapps.com.gencycler.recyclerAdapters.TestAdapter
  * Created by gilgoldzweig on 14/10/2017.
  */
 
-@RecyclerAdapter(R::class, "TestAdapter")
+@RecyclerAdapter("TestAdapter")
 class SomeClass(context: Context, elements: ArrayList<GencyclerDataType>) : TestAdapter(context, elements) {
     override fun ProfileTypeViewHolder.onBindProfileTypeViewHolder(position: Int, element: ProfileType) {
 
@@ -30,8 +31,9 @@ class SomeClass(context: Context, elements: ArrayList<GencyclerDataType>) : Test
 //}
 
 
-@Holder("R.layout.type_one", R.layout.type_one, SomeClass::class)
+@Holder(R.layout.type_one, SomeClass::class)
 data class ProfileType(
+        @Unique
         val name: String,
 
         val age: Int,
