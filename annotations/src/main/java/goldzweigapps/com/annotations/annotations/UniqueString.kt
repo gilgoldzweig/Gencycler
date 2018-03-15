@@ -5,4 +5,4 @@ package goldzweigapps.com.annotations.annotations
  */
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.FIELD)
-annotation class Unique
+annotation class UniqueString

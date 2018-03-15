@@ -12,5 +12,4 @@ import kotlin.reflect.KClass
 @Repeatable
 annotation class Holder(@LayoutRes val layoutRes: Int,
                         vararg val recyclerAdapters: KClass<out Any>,
-                        val uniqueString: String = "",
-                        val uniqueInt: Int = -1)
+                        val uniqueString: String = "")

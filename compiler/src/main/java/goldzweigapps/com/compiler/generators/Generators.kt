@@ -72,11 +72,17 @@ class Generators(private val rClass: ClassName, private val viewHolders: List<Vi
                 .addModifiers(KModifier.OVERRIDE)
         val layoutSwitch = CodeBlock.builder()
         var supportedTypes = ""
-        layoutSwitch.add("return when(elements[position]) {\n")
+        layoutSwitch.add("val element = elements[position]\n")
+        layoutSwitch.add("return when {\n")
         for (holder in viewHolders) {
             val dataType = ClassName.bestGuess(holder.classType)
             supportedTypes += "${dataType.simpleName()}, "
-            layoutSwitch.add("\n        is %T -> R.layout.%L", dataType, holder.layoutName)
+            if (holder.unique) {
+                layoutSwitch.add("\n        (element as %T).${holder.uniqueName} == \"${holder.uniqueValue}\" -> R.layout.%L", dataType, holder.layoutName)
+            } else {
+                layoutSwitch.add("\n        element is %T -> R.layout.%L", dataType, holder.layoutName)
+            }
+
         }
         supportedTypes = supportedTypes.removeLastChars(2)
         layoutSwitch.add("\n        else -> throw %T(\"unsupported type at \$position, only ($supportedTypes) are supported\")",

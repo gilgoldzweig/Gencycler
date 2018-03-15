@@ -7,7 +7,6 @@ import goldzweigapps.com.compiler.models.View
 import goldzweigapps.com.compiler.models.ViewHolder
 import org.w3c.dom.Node
 import java.io.File
-import javax.annotation.processing.ProcessingEnvironment
 import javax.xml.parsers.DocumentBuilderFactory
 
 /**
@@ -19,13 +18,18 @@ class XMLParser(private val layoutFile: File,
 
 
     @Throws(Exception::class)
-    override fun parse(layoutName: String): ViewHolder {
+    override fun parse(layoutName: String,
+                       isUniqueAnnotationPresent: Boolean,
+                       uniqueName: String?,
+                       uniqueValue: String?): ViewHolder {
         val layouts = layoutFile.listFiles()
         val layoutFile = try {
             layouts.firstOrNull { it.nameWithoutExtension == layoutName }
         } catch (e: Exception) {
             layouts.firstOrNull { it.name == layoutName }
-        } ?: throw Throwable("Layout was not found: $layoutName, are you sure you wrote it correctly?")
+        }
+                ?: throw Throwable("Layout was not found: $layoutName, are you sure you wrote it correctly?")
+
         val views = ArrayList<View>()
 
         with(layoutFile) {
@@ -39,7 +43,7 @@ class XMLParser(private val layoutFile: File,
                 buildViewFromNode(views, node)
             }
         }
-        return ViewHolder(layoutName, views, classType)
+        return ViewHolder(layoutName, views, classType, isUniqueAnnotationPresent, uniqueName, uniqueValue)
     }
 
     private fun buildViewFromNode(views: ArrayList<View>, node: Node) {

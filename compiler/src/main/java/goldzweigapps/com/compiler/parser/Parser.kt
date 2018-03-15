@@ -14,5 +14,8 @@ interface Parser {
     val classType: String
 
     @Throws(Exception::class)
-    fun parse(layoutName: String): ViewHolder
+    fun parse(layoutName: String,
+              isUniqueAnnotationPresent: Boolean = false,
+              uniqueName: String? = null,
+              uniqueValue: String? = null): ViewHolder
 }

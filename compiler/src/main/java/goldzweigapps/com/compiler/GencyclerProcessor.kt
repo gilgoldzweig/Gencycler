@@ -11,7 +11,6 @@ import goldzweigapps.com.compiler.utils.*
 import org.w3c.dom.Document
 import java.io.File
 import java.io.StringWriter
-import java.util.*
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
@@ -19,7 +18,6 @@ import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.MirroredTypeException
 import javax.lang.model.type.MirroredTypesException
-import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.OutputKeys
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -28,8 +26,6 @@ import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 import com.squareup.kotlinpoet.ClassName
 import goldzweigapps.com.compiler.finder.ManifestFinder
-import javax.lang.model.util.ElementFilter
-import javax.lang.model.type.TypeKind
 
 
 /**
@@ -37,7 +33,7 @@ import javax.lang.model.type.TypeKind
  */
 
 class GencyclerProcessor : AbstractProcessor() {
-
+    var count = 0
     var holdersMap = HashMap<String, List<ViewHolder>>()
     val layoutFile: File by lazy {
         val filer = processingEnv.filer
@@ -71,22 +67,26 @@ class GencyclerProcessor : AbstractProcessor() {
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnvironment: RoundEnvironment?): Boolean {
         if (roundEnvironment == null) return true
         if (annotations == null || annotations.isEmpty()) return true
-
+        EnvironmentUtil.logWarning(count++.toString())
 
         generateExtensionClass()
                 .writeTo(File(EnvironmentUtil.savePath()).toPath())
-
-        val recyclerAdapterAnnotation = roundEnvironment.getElementsAnnotatedWith(RecyclerAdapter::class.java)
-                .first()
-                .getAnnotation(RecyclerAdapter::class.java)
+        val recyclerAdapterAnnotationsNames = HashMap<String, RecyclerAdapter>()
+        roundEnvironment.getElementsAnnotatedWith(RecyclerAdapter::class.java)
+                .forEach { recyclerAdapterAnnotationsNames[it.simpleName.toString()] = it.getAnnotation(RecyclerAdapter::class.java) }
 
 
         for (holderElement in roundEnvironment.getElementsAnnotatedWith(Holder::class.java)) {
-
+            EnvironmentUtil.logWarning(count++.toString())
             val xmlParser = XMLParser(layoutFile, classType = holderElement.asType().toString())
             val holder = holderElement.getAnnotation(Holder::class.java)
+            val uniqueDeclaredElements = holderElement.enclosedElements
+                    .firstOrNull {
+                        it.kind.isField && it.getAnnotation(UniqueString::class.java) != null
+                    }
+            val isUniqueAnnotationDeclared = uniqueDeclaredElements != null
+            val uniqueFieldName = uniqueDeclaredElements?.simpleName?.toString()
 
-//            EnvironmentUtil.logWarning(fields.firstOrNull { it.get(Any()) == holder.layoutRes }?.name ?: "no field")
             holder
                     .parseClasss()
                     .forEach {
@@ -94,7 +94,8 @@ class GencyclerProcessor : AbstractProcessor() {
                         if (holders == null) {
                             holdersMap[it] = listOf(
                                     try {
-                                        xmlParser.parse("${valueNameLayoutMap[holder.layoutRes]}")
+                                        xmlParser.parse("${valueNameLayoutMap[holder.layoutRes]}",
+                                                isUniqueAnnotationDeclared, uniqueFieldName, holder.uniqueString)
                                     } catch (e: Exception) {
                                         e.message?.let(EnvironmentUtil::logError)
                                                 ?: e.printStackTrace()
@@ -103,7 +104,8 @@ class GencyclerProcessor : AbstractProcessor() {
                         } else {
                             holdersMap[it] = ArrayList(holders +
                                     try {
-                                        xmlParser.parse("${valueNameLayoutMap[holder.layoutRes]}")
+                                        xmlParser.parse("${valueNameLayoutMap[holder.layoutRes]}",
+                                                isUniqueAnnotationDeclared, uniqueFieldName, holder.uniqueString)
                                     } catch (e: Exception) {
                                         e.message?.let(EnvironmentUtil::logError)
                                                 ?: e.printStackTrace()
@@ -113,8 +115,11 @@ class GencyclerProcessor : AbstractProcessor() {
                     }
         }
         holdersMap.forEach {
-            startXMLClassConstriction(if (recyclerAdapterAnnotation.customName.isEmpty())
-                "Generated${ClassName.bestGuess(it.key).simpleName()}" else recyclerAdapterAnnotation.customName, it.value)
+            val className = ClassName.bestGuess(it.key).simpleName()
+            val recyclerAdapter = recyclerAdapterAnnotationsNames[className]
+            val customName = recyclerAdapter?.customName ?: ""
+
+            startXMLClassConstriction(if (customName.isEmpty()) "Generated$className" else customName, it.value)
         }
 
         return true
@@ -156,8 +161,9 @@ class GencyclerProcessor : AbstractProcessor() {
     override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latestSupported()
 
     override fun getSupportedAnnotationTypes(): Set<String> =
-            setOf(RecyclerAdapter::class.java.canonicalName, Holder::class.java.canonicalName)
-
+            setOf(RecyclerAdapter::class.java.canonicalName,
+                    Holder::class.java.canonicalName,
+                    UniqueString::class.java.canonicalName)
 
 
     private fun NamingAdapter.parseNamingAdapterClass(): String = try {
