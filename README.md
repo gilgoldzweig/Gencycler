@@ -1,12 +1,12 @@
 # Gencycler
 [![](https://jitpack.io/v/GilGoldzweig/Gencycler.svg)](https://jitpack.io/#GilGoldzweig/Gencycler)
-### Gencycler is a compile time processor so no runtime performance impact,
-Gencycler will generated a readable multi view type RecyclerView Adapter with a thread-safe accessing mechanism.
+### Gencycler is a compile-time processor so no runtime performance impact,
+Gencycler will generate a readable multi-view type RecyclerView Adapter with a thread-safe accessing mechanism.
 
 Gencycler eliminates The need to write all of the boilerplate code needed for writing an adapter and
 leaves you with only the bare minimum needed to write your business logic.
 
-By iterating over the xml files and parsing the views it removes all of the need to write findViewById
+By iterating over the XML files and parsing the views it removes all of the need to write findViewById
 
 ### Install
 
@@ -37,7 +37,7 @@ The usage is separated into two simple parts
 
 #### Adapter
 The adapter class needs to add the `@RecyclerAdapter` annotation above the adapter,
-in addition the generated adapter will need to receive two required parameters `Context, ArrayList<GencyclerDataType>`
+in addition, the generated adapter will need to receive two required parameters `Context, ArrayList<GencyclerDataType>`
 
 ##### Kotlin
     @RecyclerAdapter("CustomKotlinAdapterName")
@@ -56,7 +56,7 @@ in addition the generated adapter will need to receive two required parameters `
 
 #### Holder
 Each data type represent a holder
-In order for a class to be considered a Holder it needs to do two things
+In order for a class to be considered a Holder, it needs to do two things
 
  1. You must implement an empty interface named `GencyclerDataType`,
     that way the adapter can decide what type correspond to which layout
@@ -120,7 +120,7 @@ All you need to do is extend the generated adapter and implement the onBind func
 
 
 #### What going on in the background
-The processor will find the location of the xml file per holder and parse it to find all of it's views
+The processor will find the location of the XML file per holder and parse it to find all of its views
 If the view does not have an (android:id="@+id/your_id") attribute it will be ignored
 The Generated adapter looks something like this
 
@@ -170,12 +170,12 @@ The Generated adapter looks something like this
 
 
 ##### When you extend the adapter you also get an array of functions
-In kotlin the functions will most likely be operators and in java they will be just like normal functions
+In kotlin, the functions will most likely be operators and in Java they will be just like normal functions
 
 `customRecyclerAdapter - adType
-//removing item and notifying the adapter if you are on uiThread`
+//removing an item and notifying the adapter if you are on uiThread`
     
-`customRecyclerAdapter - 2 //removing item and notifying the adapter if you are on uiThread`
+`customRecyclerAdapter - 2 //removing an item and notifying the adapter if you are on uiThread`
     
 `customRecyclerAdapter + adType //adding item and notifying the adapter if you are on uiThread`
 
