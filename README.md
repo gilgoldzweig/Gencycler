@@ -54,7 +54,7 @@ in addition the generated adapter will need to receive two required parameters `
     }
 
 #### Holder
-Each holder represent a data type with whatever data it will contain
+Each data type represent a holder
 In order for a class to be considered a Holder it needs to do two things
 
  1. You must implement an empty interface named `GencyclerDataType`,
