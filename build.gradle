@@ -30,11 +30,8 @@ allprojects {
         }
     }
 }
-dependencies {
-    compile"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-}
+
 ext {
     suppprt = '26.1.0'
-    auto_service = '1.0-rc3'
-    kotlin_poet = '0.5.0'
+    kotlin_poet = '0.6.0'
 }
