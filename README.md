@@ -1,5 +1,5 @@
 # Gencycler
- ![Release](https://jitpack.io/v/gilgoldzweig/Gencycler.svg)
+[![](https://jitpack.io/v/GilGoldzweig/Gencycler.svg)](https://jitpack.io/#GilGoldzweig/Gencycler)
 ### Gencycler works in compile time so no runtime performance impact,
 Gencycler will generated a readable multi view type RecyclerView Adapter with a thread-safe accessing mechanism.
 Gencycler eliminates The need to write all of the boilerplate code needed for writing an adapter and
