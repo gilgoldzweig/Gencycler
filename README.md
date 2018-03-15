@@ -2,34 +2,35 @@
 
 ### Gencycler works in compile time so no runtime performance impact,
 Gencycler will generated a readable multi view type RecyclerView Adapter with a thread-safe accessing mechanism.
-
 Gencycler eliminates The need to write all of the boilerplate code needed for writing an adapter and
 leaves you with only the bare minimum needed to write your business logic.
+
 By iterating over the xml files and parsing the views it removes all of the need to write findViewById
 
 ### Install
 
 #### Kotlin
- `apply plugin: 'kotlin-kapt'
+     apply plugin: 'kotlin-kapt'
 
-  repositories {
-     maven { url "https://jitpack.io" }
-  }
-  dependencies {
-        compile 'com.github.gilgoldzweig.Gencycler:annotations:latest_version'
-        kapt 'com.github.gilgoldzweig.Gencycler:compiler:latest_version'
-  }`
+      repositories {
+         maven { url "https://jitpack.io" }
+      }
+      dependencies {
+            compile 'com.github.gilgoldzweig.Gencycler:annotations:latest_version'
+            kapt 'com.github.gilgoldzweig.Gencycler:compiler:latest_version'
+      }
 #### Java
- `apply plugin: 'kotlin-android'
+    apply plugin: 'kotlin-android'
 
-   repositories {
+    repositories {
       maven { url "https://jitpack.io" }
-   }
-   dependencies {
+    }
+
+    dependencies {
          compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$latest_kotlin_version"
          compile 'com.github.gilgoldzweig.Gencycler:annotations:latest_version'
          annotationProcessor 'com.github.gilgoldzweig.Gencycler:compiler:latest_version'
-   }`
+    }
 ### Usage
 The usage is separated into two simple parts
 
@@ -38,19 +39,19 @@ The adapter class needs to add the `@RecyclerAdapter` annotation above the adapt
 in addition the generated adapter will need to receive two required parameters `Context, ArrayList<GencyclerDataType>`
 
 ##### Kotlin
-    `@RecyclerAdapter("CustomKotlinAdapterName")
+    @RecyclerAdapter("CustomKotlinAdapterName")
     //customName is optional if not present the name will be "Gencycler + Your ClassName"
 
      class KotlinTestAdapter(context: Context,
-                         elements: ArrayList<GencyclerDataType>)`
+                         elements: ArrayList<GencyclerDataType>)
 
 ##### Java
-    `@RecyclerAdapter(customName = "CustomJavaAdapterName")
+    @RecyclerAdapter(customName = "CustomJavaAdapterName")
      //customName is optional if not present the name will be "Gencycler + Your ClassName"
     public class JavaTestAdapter {
         public JavaTestAdapter(Context context, ArrayList<GencyclerDataType> elements) {
         }
-    }`
+    }
 
 #### Holder
 Each holder represent a data type with whatever data it will contain
@@ -62,15 +63,15 @@ In order for a class to be considered a Holder it needs to do two things
  2. The class needs to add the `@Holder` annotation above itself,
 
 ##### Kotlin
-    `@Holder(R.layout.kotlin_profile_type, //The layout you want to be used for the type
+    @Holder(R.layout.kotlin_profile_type, //The layout you want to be used for the type
             KotlinTestAdapter::class) // The adapters you want to have the type
      data class ProfileType(
              val name: String,
              val age: Int,
-             val profilePicture: String) : GencyclerDataType`
+             val profilePicture: String) : GencyclerDataType
 
 ##### Java
-    `@Holder(layoutRes = R.layout.java_profile_type, //The layout you want to be used for the type
+    @Holder(layoutRes = R.layout.java_profile_type, //The layout you want to be used for the type
              recyclerAdapters = {JavaTestAdapter.class}) // The adapters you want to have the type
      public class JavaProfileType implements GencyclerDataType {
          private String name;
@@ -83,13 +84,13 @@ In order for a class to be considered a Holder it needs to do two things
              this.profilePicture = profilePicture;
          }
      }
-`
+
 
 #### Build your app and the adapter will be generated
 All you need to do is extend the generated adapter and implement the onBind function per holder
 
 ##### Kotlin
-    `@RecyclerAdapter("CustomKotlinAdapterName")
+    @RecyclerAdapter("CustomKotlinAdapterName")
      class KotlinTestAdapter(context: Context,
                              elements: ArrayList<GencyclerDataType>) : CustomKotlinAdapterName(context, elements) {
 
@@ -98,9 +99,9 @@ All you need to do is extend the generated adapter and implement the onBind func
                 //it has all the views from the layout file that have an (android:id="@+id/your_id") attribute
 
          }
-     }`
+     }
 ##### Java
-    `@RecyclerAdapter(customName = "CustomJavaAdapterName")
+    @RecyclerAdapter(customName = "CustomJavaAdapterName")
      public class JavaTestAdapter extends CustomJavaAdapterName {
          public JavaTestAdapter(Context context, ArrayList<GencyclerDataType> elements) {
              super(context, elements);
@@ -114,7 +115,7 @@ All you need to do is extend the generated adapter and implement the onBind func
                     //it contains all the views from the layout file that have an (android:id="@+id/your_id") attribute
          }
      }
-`
+
 
 
 #### What going on in the background
@@ -122,7 +123,7 @@ The processor will find the location of the xml file per holder and parse it to 
 If the view does not have an (android:id="@+id/your_id") attribute it will be ignored
 The Generated adapter looks something like this
 
-    `abstract class CustomJavaAdapterName(val context: Context, elements: ArrayList<GencyclerDataType> = ArrayList()) : GencyclerAdapterExtensions(elements) {
+    abstract class CustomJavaAdapterName(val context: Context, elements: ArrayList<GencyclerDataType> = ArrayList()) : GencyclerAdapterExtensions(elements) {
         private val inflater: LayoutInflater = LayoutInflater.from(context)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = when(viewType) {
@@ -165,10 +166,11 @@ The Generated adapter looks something like this
            val typeOneFourText: TextView = view.findViewById(R.id.type_one_four_text)
         }
      }
-`
+
 
 ##### When you extend the adapter you also get an array of functions
 In kotlin the functions will most likely be operators and in java they will be just like normal functions
+
 `customRecyclerAdapter - adType
 //removing item and notifying the adapter if you are on uiThread`
     
