@@ -3,6 +3,8 @@
 ### Gencycler is a compile-time processor so no runtime performance impact,
 Gencycler will generate a readable multi-view type RecyclerView Adapter with a thread-safe accessing mechanism.
 
+### New version with improved almost everything coming soon, keep your eyes open
+
 Gencycler eliminates The need to write all of the boilerplate code needed for writing an adapter and
 leaves you with only the bare minimum needed to write your business logic.
 
