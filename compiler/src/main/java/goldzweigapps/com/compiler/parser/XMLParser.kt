@@ -1,75 +1,107 @@
 package goldzweigapps.com.compiler.parser
 
-import com.squareup.kotlinpoet.ClassName
-import goldzweigapps.com.compiler.adapter.CamelCaseNamingAdapter
-import goldzweigapps.com.compiler.adapter.NamingAdapter
-import goldzweigapps.com.compiler.models.View
-import goldzweigapps.com.compiler.models.ViewHolder
+import goldzweigapps.com.compiler.consts.widgets
+import goldzweigapps.com.compiler.models.ViewField
+import goldzweigapps.com.compiler.utils.Logger
 import org.w3c.dom.Node
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
 
-/**
- * Created by gilgoldzweig on 09/02/2018.
- */
-class XMLParser(private val layoutFile: File,
-                override val namingAdapter: NamingAdapter = CamelCaseNamingAdapter(),
-                override val classType: String) : Parser {
+object XMLParser {
+    private val documentFactory = DocumentBuilderFactory.newInstance()
+    private val documentBuilder = documentFactory.newDocumentBuilder()
 
+    /**
+     * Retrieves an attribute value by a provided name
+     *
+     * @param xmlFile the source xml file to find the attribute from
+     * @param attributeName the name of the attribute
+     * @param nodePosition reduce the search to a specific node which is known to include the attribute
+     *
+     * @return the value of the argument or null if it does not exist
+     */
+    fun findAttributeByName(xmlFile: File, attributeName: String, nodePosition: Int? = null): String? {
+        val attributes = xmlFile.asNode().attributes
+        if (attributeName.isEmpty() || attributes.length == 0) return null
 
-    @Throws(Exception::class)
-    override fun parse(layoutName: String,
-                       isUniqueAnnotationPresent: Boolean,
-                       uniqueName: String?,
-                       uniqueValue: String?): ViewHolder {
-        val layouts = layoutFile.listFiles()
-        val layoutFile = try {
-            layouts.firstOrNull { it.nameWithoutExtension == layoutName }
-        } catch (e: Exception) {
-            layouts.firstOrNull { it.name == layoutName }
-        }
-                ?: throw Throwable("Layout was not found: $layoutName, are you sure you wrote it correctly?")
+        if (nodePosition != null && nodePosition >= 0 && nodePosition < attributes.length) {
+            return attributes.item(nodePosition)
+                    .attributes
+                    .getNamedItem(attributeName)?.nodeValue
+        } else {
 
-        val views = ArrayList<View>()
-
-        with(layoutFile) {
-            val factory = DocumentBuilderFactory.newInstance()
-            val builder = factory.newDocumentBuilder()
-            val doc = builder.parse(this)
-            val element = doc.documentElement
-            val nodes = element.childNodes
-            for (i in 0 until nodes.length) {
-                val node = nodes.item(i)
-                buildViewFromNode(views, node)
+            for (i in 0 until attributes.length) {
+                val node = attributes.item(i)
+                val name = node.nodeName
+                val value = node.nodeValue
+                if (name == attributeName) {
+                    return value
+                }
             }
-        }
-        return ViewHolder(layoutName, views, classType, isUniqueAnnotationPresent, uniqueName, uniqueValue)
-    }
-
-    private fun buildViewFromNode(views: ArrayList<View>, node: Node) {
-        if (node.hasAttributes() && node.attributes.getNamedItem("android:id") != null) {
-            with(node.attributes) {
-                val id = getNamedItem("android:id").nodeValue.removePrefix("@+id/")
-                val viewType = findViewType(node.nodeName)
-                val fieldName = namingAdapter.buildNameForId(id)
-                views += View(fieldName, id, viewType)
-            }
-        }
-        if (node.hasChildNodes()) {
-            val nodes = node.childNodes
-            for (i in 0 until nodes.length) {
-                buildViewFromNode(views, nodes.item(i))
-            }
+            throw Throwable("R class was not found")
         }
     }
 
-    private fun findViewType(nodeName: String): String {
-        if (nodeName.contains('.')) return nodeName
-        return try {
-            ClassName.bestGuess("android.widget.$nodeName").canonicalName
-        } catch (e: Exception) {
-            "android.view.View"
+    /**
+     * Parses the xml file and generate a ViewField for every node that contains a 'android:id' attribute
+     *
+     * @param xmlFile the source android layout xml file
+     * @return a set of ViewField
+     * @see ViewField
+     */
+    fun parseViewFields(xmlFile: File): List<ViewField> =
+            xmlFile.asNode().getViewsFromNode()
+
+
+    private fun Node.getViewsFromNode(existingViews: MutableList<ViewField> = ArrayList()): List<ViewField> {
+        toViewField()?.let {
+            existingViews.add(it)
         }
+        if (hasChildNodes()) {
+            for (index in 0 until childNodes.length) {
+                childNodes.item(index).getViewsFromNode(existingViews)
+            }
+        }
+        return existingViews
+    }
+
+    private fun Node.toViewField(): ViewField? {
+        val fieldIdAttribute = attributes
+                ?.getNamedItem("android:id")
+                ?.nodeValue ?: return null
+
+        return ViewField(fieldIdAttribute.removePrefix("@+id/"), analyzeNodeViewType())
+    }
+
+
+    /**
+     * Parses the xml node name
+     *
+     */
+    private fun Node.analyzeNodeViewType(): String {
+        return when {
+            '.' in nodeName -> //Node has a full package name so we'll use that
+                nodeName
+
+            nodeName in widgets -> //Node is part of android widgets we fill in the missing package name
+                "android.widget.$nodeName"
+
+            else -> //Node has unknown package we just say it's a View
+                "android.view.View"
+
+        }
+    }
+
+    /**
+     * Converts a Xml file to a Xml node
+     * @param receiver a Xml file
+     *
+     * @return the parsed file root node
+     */
+    private fun File.asNode(): Node {
+        val xmlDocument = documentBuilder.parse(this)
+        val element = xmlDocument.documentElement
+        return element as Node
     }
 
 }

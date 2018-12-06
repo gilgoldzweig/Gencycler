@@ -1,37 +1,39 @@
 package goldzweigapps.com.compiler.utils
 
+import goldzweigapps.com.compiler.consts.Packages
+import goldzweigapps.com.compiler.models.Option
+import java.io.File
+import javax.annotation.processing.Filer
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.type.TypeMirror
 import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
 import javax.tools.Diagnostic
+import javax.tools.StandardLocation
 
 object EnvironmentUtil {
     private lateinit var processingEnvironment: ProcessingEnvironment
+    private lateinit var filer: Filer
+    private lateinit var options: Options
     private var initialize = false
 
 
     fun init(environment: ProcessingEnvironment) {
         processingEnvironment = environment
+        filer = processingEnvironment.filer
+        options = Options(processingEnvironment)
         initialize = true
     }
 
-    fun logError(message: String) {
-        if (!initialize) return
-        processingEnvironment.messager.printMessage(Diagnostic.Kind.ERROR, message)
-    }
+    fun getOptionValue(option: Option): String? =
+            options[option]
 
-    fun logWarning(message: String) {
-        if (!initialize) return
-        processingEnvironment.messager.printMessage(Diagnostic.Kind.WARNING, message)
-    }
-    fun savePath() : String {
-        if (!initialize) return ""
-        val generatedPath = processingEnvironment.options["kapt.kotlin.generated"]
-        return generatedPath
-                ?.replace("(.*)tmp(/kapt/debug/)kotlinGenerated".toRegex(), "$1generated/source$2")!!
-                .replace("kaptKotlin", "kapt")
-    }
+
+
+    fun generateOutputFile(fileSimpleName: String): File =
+        File(filer.getResource(StandardLocation.SOURCE_OUTPUT,"", "$fileSimpleName.kt")
+                .toUri())
+
 
     fun isSerializable(typeMirror: TypeMirror): Boolean {
         if (!initialize) return false

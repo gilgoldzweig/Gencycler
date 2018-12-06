@@ -1,21 +1,19 @@
-apply plugin: 'java'
 apply plugin: 'kotlin'
 apply plugin: 'com.github.dcendents.android-maven'
+
 group='com.github.gilgoldzweig'
 
+
 dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    api project(':annotations')
+    implementation "com.squareup:kotlinpoet:$kotlin_poet"
+    implementation 'com.google.guava:guava:27.0.1-android'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    compileOnly gradleApi()
-    compile 'com.android.tools.build:gradle:3.0.1'
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    compile project(':annotations')
-    compile "com.squareup:kotlinpoet:$kotlin_poet"
-    compile "com.android.support:recyclerview-v7:$suppprt"
-
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'com.google.guava:guava:24.1-jre'
+    testImplementation 'com.google.truth:truth:0.42'
+    testImplementation "com.squareup:kotlinpoet:$kotlin_poet"
+    testImplementation 'com.google.testing.compile:compile-testing:0.15'
 }
-//Properties properties = new Properties()
-//properties.load(project.rootProject.file('local.properties').newDataInputStream())
-
-sourceCompatibility = "1.7"
-targetCompatibility = "1.7"

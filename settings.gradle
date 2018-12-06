@@ -1,1 +1,1 @@
-include ':app', ':annotations', ':compiler'
+include ':sample', ':annotations', ':compiler', ':gencycler'
