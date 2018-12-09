@@ -1,12 +1,15 @@
 
 # Gencycler
+[![latest version](https://jitpack.io/v/gilgoldzweig/Gencycler.svg)](https://jitpack.io/#gilgoldzweig/Gencycler)
+
+
 A Boilerplate free RecyclerView adapter.
 Gencycler uses annotation processing to analyze your code and generates the Recyclerview adapter for you,
 which means you only need to worry about your logic and not about the adapter
 
 - Written in Kotlin <3, for Kotlin and Java
 - Generates human readable code(plus comments, minus the human errors)
-- Clean and optimized code -Generates only what is required
+- Clean and optimized code - Generates only what is required
 - Click / Long-Click listeners
 - Multi view types
 - Expandable items
@@ -76,12 +79,20 @@ Each class represents a ViewHolder & Data model. In order to associate the class
 Just create a class and annotate it with `@GencyclerAdapter`
 place every model you want the adapter to use inside the annotation as shown below.
 
-    //Kotlin
-    @GencyclerAdapter(SimpleModel::class) //for multiple view types just seperated each model by a comma 
+    //Kotlin - Single view type
+    @GencyclerAdapter(SimpleModel::class)
     class SimpleAdapter
     
-    //Java
-    @GencyclerAdapter(SimpleModel.class)  //for multiple view types just provide an array
+    //Kotlin - Mutli view type
+    @GencyclerAdapter(SimpleModel::class, AnotherModel::class) //for multiple view types just seperated each model by a comma 
+    class SimpleAdapter
+    
+    //Java - Single view type
+    @GencyclerAdapter(SimpleModel.class)
+    public class SimpleAdapter {}
+    
+    //Java - Multi view type
+    @GencyclerAdapter({SimpleModel.class, AnotherModel.class})  //for multiple view types just provide an array
     public class SimpleAdapter {}
 
 ### 3. Compile
@@ -160,11 +171,11 @@ By default the processor turns the id of every view in the xml layout to variabl
 
 You can change the names of the variables by specifying a naming adapter inside the `@GencyclerViewHolder` as shown below
 
-	//Kotlin
+    //Kotlin
     @GencyclerViewHolder(R.layout.item_simple, NamingCase.NAMING_CASE_SNAKE)  
     data class SimpleModel(val name: String, val description: String) : GencyclerModel
 
-	//Java
+    //Java
     @GencyclerViewHolder(value = R.layout.java_profile_type, namingCase = NamingCase.NAMING_CASE_SNAKE)  
     public class SimpleModel implements GencyclerModel {  
         private String name;  
