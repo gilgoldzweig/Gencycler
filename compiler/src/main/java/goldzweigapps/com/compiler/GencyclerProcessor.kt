@@ -1,9 +1,7 @@
 package goldzweigapps.com.compiler
 
 import com.squareup.kotlinpoet.*
-import goldzweigapps.com.annotations.annotations.GencyclerAdapter
-import goldzweigapps.com.annotations.annotations.GencyclerDataContainer
-import goldzweigapps.com.annotations.annotations.GencyclerViewHolder
+import goldzweigapps.com.annotations.annotations.*
 import goldzweigapps.com.compiler.models.Adapter
 import goldzweigapps.com.compiler.models.ViewHolder
 import goldzweigapps.com.compiler.adapter.getNamingAdapter
@@ -15,12 +13,13 @@ import goldzweigapps.com.compiler.models.asClassName
 import goldzweigapps.com.compiler.parser.XMLParser
 import goldzweigapps.com.compiler.utils.*
 import java.io.File
+import java.lang.IllegalArgumentException
+import java.lang.annotation.AnnotationTypeMismatchException
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
-import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.MirroredTypesException
 import javax.lang.model.type.TypeMirror
 
@@ -31,112 +30,120 @@ import javax.lang.model.type.TypeMirror
 
 class GencyclerProcessor : AbstractProcessor() {
 
-    private lateinit var layoutFolder: File
-    private lateinit var manifestFinder: AndroidManifestFinder
-    private lateinit var rClass: ClassName
-    private lateinit var valueNameLayoutMap: Map<Int, String>
+	private lateinit var layoutFolder: File
+	private lateinit var manifestFinder: AndroidManifestFinder
+	private lateinit var rClass: ClassName
+	private lateinit var valueNameLayoutMap: Map<Int, String>
 
-    private lateinit var viewHolderGenerator: ViewHolderGenerator
-    private lateinit var recyclerAdapterGenerator: RecyclerAdapterGenerator
-
-
-    override fun init(p0: ProcessingEnvironment?) {
-        super.init(p0)
-        if (p0 == null) return
-        EnvironmentUtil.init(processingEnv)
-        Logger.init(processingEnv)
-        manifestFinder = AndroidManifestFinder(processingEnv)
-        rClass = manifestFinder.findRClass()
-        layoutFolder = FileHelper.findModuleLayoutFolder(processingEnv)
-        valueNameLayoutMap = manifestFinder.generateLayoutValueMap(rClass)
-        viewHolderGenerator = ViewHolderGenerator(rClass)
-        recyclerAdapterGenerator = RecyclerAdapterGenerator()
-    }
+	private lateinit var viewHolderGenerator: ViewHolderGenerator
+	private lateinit var recyclerAdapterGenerator: RecyclerAdapterGenerator
 
 
-    override fun process(annotations: MutableSet<out TypeElement>?, roundEnvironment: RoundEnvironment?): Boolean {
-        if (roundEnvironment == null) return true
-        if (annotations == null || annotations.isEmpty()) return true
+	override fun init(p0: ProcessingEnvironment?) {
+		super.init(p0)
+		if (p0 == null) return
+		EnvironmentUtil.init(processingEnv)
+		Logger.init(processingEnv)
+		manifestFinder = AndroidManifestFinder(processingEnv)
+		rClass = manifestFinder.findRClass()
+		layoutFolder = FileHelper.findModuleLayoutFolder(processingEnv)
+		valueNameLayoutMap = manifestFinder.generateLayoutValueMap(rClass)
+		viewHolderGenerator = ViewHolderGenerator(rClass)
+		recyclerAdapterGenerator = RecyclerAdapterGenerator()
+	}
 
-        val viewHolders = ArrayList<ViewHolder>()
-        val viewTypes = HashMap<String, ViewType>()
 
-        roundEnvironment
-                .getElementsAnnotatedWith(GencyclerViewHolder::class.java)
-                .forEach {
-                    val typeElement = it as TypeElement
+	override fun process(annotations: MutableSet<out TypeElement>?, roundEnvironment: RoundEnvironment?): Boolean {
+		if (roundEnvironment == null) return true
+		if (annotations == null || annotations.isEmpty()) return true
 
-                    val holder = it.getAnnotation(GencyclerViewHolder::class.java)
-                    val layoutName = valueNameLayoutMap[holder.value]
-                    val dataTypeContainer = typeElement.asClassName()
+		val viewHolders = ArrayList<ViewHolder>()
+		val viewTypes = HashMap<String, ViewType>()
 
-                    val layoutFile = File("$layoutFolder/$layoutName.xml")
+		roundEnvironment
+				.getElementsAnnotatedWith(GencyclerViewHolder::class.java)
+				.forEach {
+					val typeElement = it as TypeElement
 
-                    if (!layoutFile.exists()) {
-                        Logger.e("Layout not found $layoutFile")
-                        return true
-                    }
+					val holder = it.getAnnotation(GencyclerViewHolder::class.java)
 
-                    val viewHolder = ViewHolder("${it.simpleName}ViewHolder",
-                            layoutName!!,
-                            getNamingAdapter(holder.namingCase),
-                            XMLParser.parseViewFields(layoutFile))
+					val layoutName = valueNameLayoutMap[holder.value]
+					val dataTypeContainer = typeElement.asClassName()
 
-                    viewHolders.add(viewHolder)
+					val layoutFile = File("$layoutFolder/$layoutName.xml")
 
-                    viewTypes[dataTypeContainer.canonicalName] =
-                            ViewType(layoutName, dataTypeContainer, viewHolder.asClassName())
-                }
+					if (!layoutFile.exists()) {
+						Logger.e("Layout not found $layoutFile")
+						return true
+					}
 
-        viewHolderGenerator.generate(viewHolders)
-                .writeTo(EnvironmentUtil.generateOutputFile(ViewHolderGenerator.FILE_NAME))
+					val viewHolder = ViewHolder("${it.simpleName}ViewHolder",
+							layoutName!!,
+							getNamingAdapter(holder.namingCase),
+							XMLParser.parseViewFields(layoutFile))
 
-        roundEnvironment
-                .getElementsAnnotatedWith(GencyclerAdapter::class.java)
-                .forEach {
+					viewHolders.add(viewHolder)
 
-                    val adapter = it.getAnnotation(GencyclerAdapter::class.java)
+					viewTypes[dataTypeContainer.canonicalName] =
+							ViewType(layoutName, dataTypeContainer, viewHolder.asClassName())
+				}
 
-                    val adapterViewTypes = ArrayList<ViewType>()
+		viewHolderGenerator.generate(viewHolders)
+				.writeTo(EnvironmentUtil.generateOutputFile(ViewHolderGenerator.FILE_NAME))
 
-                    adapter.holders.forEach { holderName ->
-                        val viewType = viewTypes[holderName]
-                        if (viewType == null) {
-                            Logger.e("""
+		roundEnvironment
+				.getElementsAnnotatedWith(GencyclerAdapter::class.java)
+				.forEach {
+
+					val adapter = it.getAnnotation(GencyclerAdapter::class.java)
+
+					val clickable = it.getAnnotation(Clickable::class.java) != null
+					val longClickable = it.getAnnotation(LongClickable::class.java) != null
+					val filterable = it.getAnnotation(Filterable::class.java) != null
+
+					val adapterViewTypes = adapter.holders.map { holderName ->
+						viewTypes[holderName] ?: throw IllegalArgumentException("""
                                 No generated ViewHolder found for $holderName.
                                 Are you sure you it was annotated with GencyclerViewHolder?
                             """.trimIndent())
-                        } else {
-                            adapterViewTypes.add(viewType)
-                        }
-                    }
+					}
 
-                    val generatedAdapter = Adapter("Generated${it.simpleName}", adapterViewTypes)
+					val adapterName = if (adapter.customName.isEmpty()) {
+						"Generated${it.simpleName}"
+					} else {
+						adapter.customName
+					}
 
-
-                    recyclerAdapterGenerator.generate(generatedAdapter)
-                            .writeTo(EnvironmentUtil.generateOutputFile(generatedAdapter.name))
-
-                }
-
-        return false
-    }
-
-    override fun getSupportedSourceVersion(): SourceVersion =
-            SourceVersion.latestSupported()
-
-    override fun getSupportedAnnotationTypes(): Set<String> =
-            setOf(GencyclerViewHolder::class.java.canonicalName,
-                    GencyclerAdapter::class.java.canonicalName)
+					val generatedAdapter = Adapter(adapterName, adapterViewTypes,
+							clickable, longClickable, filterable)
 
 
-    private inline val GencyclerAdapter.holders: List<String>
-        get() {
-            return try {
-                value.map { it.qualifiedName ?: "" }
-            } catch (e: MirroredTypesException) {
-                e.typeMirrors.map(TypeMirror::toString)
-            }
-        }
+					recyclerAdapterGenerator.generate(generatedAdapter)
+							.writeTo(EnvironmentUtil.generateOutputFile(generatedAdapter.name))
+
+				}
+
+		return false
+	}
+
+	override fun getSupportedSourceVersion(): SourceVersion =
+			SourceVersion.latestSupported()
+
+	override fun getSupportedAnnotationTypes(): Set<String> =
+			setOf(GencyclerViewHolder::class.java.canonicalName,
+					GencyclerAdapter::class.java.canonicalName,
+					Clickable::class.java.canonicalName,
+					LongClickable::class.java.canonicalName,
+					Filterable::class.java.canonicalName)
+
+
+	private inline val GencyclerAdapter.holders: List<String>
+		get() {
+			return try {
+				value.map { it.qualifiedName ?: "" }
+			} catch (e: MirroredTypesException) {
+				e.typeMirrors.map(TypeMirror::toString)
+			}
+		}
 }
 

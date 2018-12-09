@@ -2,13 +2,13 @@ package goldzweigapps.com.compiler.generators
 
 import com.squareup.kotlinpoet.*
 import goldzweigapps.com.compiler.adapter.NamingAdapter
+import goldzweigapps.com.compiler.consts.KDocs
 import goldzweigapps.com.compiler.consts.Names
 import goldzweigapps.com.compiler.consts.Packages
 import goldzweigapps.com.compiler.consts.Parameters
 import goldzweigapps.com.compiler.models.ViewField
 import goldzweigapps.com.compiler.models.ViewHolder
 import goldzweigapps.com.compiler.models.asClassName
-import goldzweigapps.com.compiler.utils.Logger
 import goldzweigapps.com.compiler.utils.simpleEnumName
 
 class ViewHolderGenerator(private val rClass: ClassName) {
@@ -16,11 +16,6 @@ class ViewHolderGenerator(private val rClass: ClassName) {
 
     private val fileBuilder = FileSpec.builder(Packages.GENCYCLER,
             FILE_NAME)
-
-    private val viewHolderKDoc = """
-        Generated ViewHolder created based on [%T.layout.%L]
-
-    """.trimIndent()
 
     /**
      * Generate all ViewHolders requested using the 'GencyclerViewHolder' annotation
@@ -32,9 +27,6 @@ class ViewHolderGenerator(private val rClass: ClassName) {
      */
     fun generate(viewHolders: List<ViewHolder>): FileSpec {
 
-        fileBuilder.addImport(rClass.packageName, rClass.simpleName)
-        fileBuilder.addImport(Parameters.VIEW_HOLDER_SUPER_CLASS.packageName,
-                Parameters.VIEW_HOLDER_SUPER_CLASS.simpleName)
 
         val identificationEnum = generateIdentificationEnum()
         val identificationEnumCodeBlockBuilder = CodeBlock.Builder()
@@ -94,7 +86,7 @@ class ViewHolderGenerator(private val rClass: ClassName) {
 
     private fun generateViewHolder(holder: ViewHolder): TypeSpec {
         return TypeSpec.classBuilder(holder.asClassName())
-                .addKdoc(viewHolderKDoc, rClass, holder.layoutName)
+                .addKdoc(KDocs.VIEW_HOLDER_FUNC, rClass, holder.layoutName)
                 .primaryConstructor(FunSpec.constructorBuilder()
                         .addParameter(Parameters.VIEW_PARAMETER_SPEC)
                         .build())
@@ -110,7 +102,7 @@ class ViewHolderGenerator(private val rClass: ClassName) {
                                      namingAdapter: NamingAdapter): PropertySpec {
         return PropertySpec
                 .builder(namingAdapter.buildNameForId(viewField.resId), ClassName.bestGuess(viewField.viewClassName))
-                .initializer("findView(R.id.${viewField.resId})")
+                .initializer("findView(%T.id.%L)", rClass, viewField.resId)
                 .build()
     }
 
@@ -120,7 +112,7 @@ class ViewHolderGenerator(private val rClass: ClassName) {
                                      id: Int): Pair<String, TypeSpec> {
         return enumName to TypeSpec.anonymousClassBuilder()
                 .addSuperclassConstructorParameter("$id")
-                .addSuperclassConstructorParameter("R.layout.%L", layoutName)
+                .addSuperclassConstructorParameter("%T.layout.%L", rClass, layoutName)
                 .build()
     }
 

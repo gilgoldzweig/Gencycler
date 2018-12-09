@@ -12,5 +12,14 @@ import android.view.View
 open class GencyclerHolder(view: View) : RecyclerView.ViewHolder(view) {
 
  
-    fun <T : View> findView(@IdRes id: Int): T = itemView.findViewById(id)
+    protected fun <T : View> findView(@IdRes id: Int): T = itemView.findViewById(id)
+
+
+    open fun onClicked(onClicked: (view: View) -> Unit) {
+        itemView.setOnClickListener(onClicked::invoke)
+    }
+
+    open fun onLongClicked(onLongClicked: (view: View) -> Boolean) {
+        itemView.setOnLongClickListener(onLongClicked::invoke)
+    }
 }

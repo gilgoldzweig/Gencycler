@@ -15,7 +15,7 @@ android {
 
 //        javaCompileOptions {
 //            annotationProcessorOptions {
-//                arguments = ["resourcesFolder": "dev"]
+//                arguments = ["resourcesFolder": ]
 //            }
 //        }
     }
@@ -26,7 +26,27 @@ android {
         }
     }
 
+//    productFlavors {
+//        dev {
+//            // Assigns this product flavor to the "version" flavor dimension.
+//            // This property is optional if you are using only one dimension.
+//            dimension "1.2.0"
+//            applicationIdSuffix ".dev"
+//            versionNameSuffix "-dev"
+//            dimension "tier"
+//        }
+//        prod {
+//            // Assigns this product flavor to the "version" flavor dimension.
+//            // This property is optional if you are using only one dimension.
+//            dimension "1.0.1-alpha2"
+//            applicationIdSuffix ""
+//            dimension "tier"
+//        }
+//    }
+
 }
+
+
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
 repositories {

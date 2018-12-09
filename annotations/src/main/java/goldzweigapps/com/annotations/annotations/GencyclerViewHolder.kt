@@ -1,8 +1,6 @@
 package goldzweigapps.com.annotations.annotations
 
-import android.support.annotation.IntDef
 import android.support.annotation.LayoutRes
-import kotlin.reflect.KClass
 
 /**
  * Requests the Gencycler code generator to generate a new ViewHolder for the annotated class
@@ -24,7 +22,7 @@ import kotlin.reflect.KClass
  * 		val profileItemNameTxt: TextView = findView(R.id.profile_item_name_txt)
  *
  * @see NamingCase
- * @see GencyclerDataContainer
+ * @see GencyclerModel
  * @see GencyclerAdapter
  */
 @Retention(AnnotationRetention.SOURCE)
