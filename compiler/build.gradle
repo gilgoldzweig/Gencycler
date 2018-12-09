@@ -10,10 +10,4 @@ dependencies {
     implementation "com.squareup:kotlinpoet:$kotlin_poet"
     implementation 'com.google.guava:guava:27.0.1-android'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'com.google.guava:guava:24.1-jre'
-    testImplementation 'com.google.truth:truth:0.42'
-    testImplementation "com.squareup:kotlinpoet:$kotlin_poet"
-    testImplementation 'com.google.testing.compile:compile-testing:0.15'
 }

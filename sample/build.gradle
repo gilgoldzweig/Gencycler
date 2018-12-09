@@ -5,6 +5,7 @@ apply plugin: 'kotlin-kapt'
 android {
     compileSdkVersion 28
     buildToolsVersion '28.0.3'
+
     defaultConfig {
         applicationId "goldzweigapps.com.gencycler"
         minSdkVersion 14
@@ -13,11 +14,6 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
-//        javaCompileOptions {
-//            annotationProcessorOptions {
-//                arguments = ["resourcesFolder": ]
-//            }
-//        }
     }
     buildTypes {
         release {
@@ -26,34 +22,18 @@ android {
         }
     }
 
-//    productFlavors {
-//        dev {
-//            // Assigns this product flavor to the "version" flavor dimension.
-//            // This property is optional if you are using only one dimension.
-//            dimension "1.2.0"
-//            applicationIdSuffix ".dev"
-//            versionNameSuffix "-dev"
-//            dimension "tier"
-//        }
-//        prod {
-//            // Assigns this product flavor to the "version" flavor dimension.
-//            // This property is optional if you are using only one dimension.
-//            dimension "1.0.1-alpha2"
-//            applicationIdSuffix ""
-//            dimension "tier"
-//        }
-//    }
-
 }
 
 
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
+
 repositories {
     maven {
         url { 'https://jitpack.io' }
     }
 }
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
