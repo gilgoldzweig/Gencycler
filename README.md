@@ -1,12 +1,15 @@
 
 # Gencycler
+[![latest version](https://jitpack.io/v/gilgoldzweig/Gencycler.svg)](https://jitpack.io/#gilgoldzweig/Gencycler)
+
+
 A Boilerplate free RecyclerView adapter.
 Gencycler uses annotation processing to analyze your code and generates the Recyclerview adapter for you,
 which means you only need to worry about your logic and not about the adapter
 
 - Written in Kotlin <3, for Kotlin and Java
 - Generates human readable code(plus comments, minus the human errors)
-- Clean and optimized code -Generates only what is required
+- Clean and optimized code - Generates only what is required
 - Click / Long-Click listeners
 - Multi view types
 - Expandable items
