@@ -83,12 +83,12 @@ place every model you want the adapter to use inside the annotation as shown bel
     @GencyclerAdapter(SimpleModel::class)
     class SimpleAdapter
     
-     //Kotlin - Mutli view type
+    //Kotlin - Mutli view type
     @GencyclerAdapter(SimpleModel::class, AnotherModel::class) //for multiple view types just seperated each model by a comma 
     class SimpleAdapter
     
     //Java - Single view type
-    @GencyclerAdapter(SimpleModel.class)  //for multiple view types just provide an array
+    @GencyclerAdapter(SimpleModel.class)
     public class SimpleAdapter {}
     
     //Java - Multi view type
