@@ -9,3 +9,7 @@ import goldzweigapps.com.gencycler.R
 @GencyclerViewHolder(R.layout.kotlin_profile_type)
 data class SimpleModel(val name: String,
 					   val description: String) : GencyclerModel
+
+@GencyclerViewHolder(R.layout.kotlin_profile_type)
+data class AnotherSimpleModel(val name: String,
+					   val description: String) : GencyclerModel
