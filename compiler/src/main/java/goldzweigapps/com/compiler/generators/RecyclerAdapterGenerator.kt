@@ -56,7 +56,7 @@ class RecyclerAdapterGenerator {
 		val setupFunctions = ArrayList<FunSpec>()
 		val abstractFunctions = ArrayList<FunSpec>()
 
-		var parametrizedType = Parameters.GENERIC_DATA_MODEL
+		var parametrizedType: TypeName = Parameters.GENERIC_DATA_MODEL
 		var parametrizedHolderType = Parameters.VIEW_HOLDER_SUPER_CLASS
 
 		when {
@@ -67,9 +67,13 @@ class RecyclerAdapterGenerator {
 				val viewType = adapter.viewTypes.first()
 
 				val viewHolder = viewType.viewHolderType
+
 				val dataType = viewType.dataContainerType
 
 				parametrizedType = dataType
+
+
+
 				parametrizedHolderType = viewHolder
 
 
@@ -99,11 +103,9 @@ class RecyclerAdapterGenerator {
 
 				for (viewType in adapter.viewTypes) {
 					val viewHolder = viewType.viewHolderType
-					val dataType = viewType.dataContainerType
 
 					val viewHolderEnumName = viewHolder.simpleEnumName
 					val viewHolderSimpleName = viewHolder.simpleName
-					val dataTypeSimpleName = dataType.simpleName
 
 					createViewHolderCodeBuilder
 							.insertCreateViewHolderCase(viewType, viewHolderEnumName)
@@ -117,8 +119,20 @@ class RecyclerAdapterGenerator {
 					recycleViewHolderCodeBuilder
 							.insertRecycleViewHolderCase(viewType, viewHolderSimpleName)
 
+					var dataType = viewType.dataContainerType
 
-					supportedViewTypesSimpleName.add(dataTypeSimpleName)
+					supportedViewTypesSimpleName.add(
+							when (dataType) {
+								is ClassName ->
+									dataType.simpleName
+
+								is ParameterizedTypeName ->
+									dataType.rawType.simpleName
+
+								else ->
+									throw IllegalArgumentException("Unexpected type was found")
+
+							})
 
 					abstractFunctions.addAll(listOf(
 							generateAbstractBindFunc(viewType),
@@ -419,7 +433,13 @@ class RecyclerAdapterGenerator {
 				.build()
 	}
 
-	private fun generateAbstractPerformFilterFunc(dataType: ClassName): FunSpec {
+	private fun generateAbstractPerformFilterFunc(typeName: TypeName): FunSpec {
+		val dataType = if (typeName is ParameterizedTypeName) {
+			typeName.rawType
+		} else {
+			typeName as ClassName
+		}
+
 		val dataTypeParamName = dataType.simpleParameterName
 
 		val dataTypeParam = ParameterSpec

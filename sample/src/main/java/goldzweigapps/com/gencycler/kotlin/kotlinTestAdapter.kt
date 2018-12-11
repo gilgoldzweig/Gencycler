@@ -9,8 +9,7 @@ import goldzweigapps.com.gencycler.kotlin.simple.SimpleModel
 
 @GencyclerAdapter(SimpleModel::class)
 class SimpleAdapter(context: Context,
-					elements: ArrayList<SimpleModel>) :
-		GeneratedSimpleAdapter(context, elements) {
+					elements: ArrayList<SimpleModel>) : GeneratedSimpleAdapter(context, elements) {
 
 	override fun onBindSimpleModelViewHolder(simpleModelViewHolder: SimpleModelViewHolder, simpleModel: SimpleModel, position: Int) {
 

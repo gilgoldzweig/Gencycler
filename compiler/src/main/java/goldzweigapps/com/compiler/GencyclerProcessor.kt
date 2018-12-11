@@ -20,8 +20,12 @@ import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
+import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.MirroredTypesException
 import javax.lang.model.type.TypeMirror
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.sun.tools.doclint.Env
+import javax.lang.model.element.TypeParameterElement
 
 
 /**
@@ -63,12 +67,30 @@ class GencyclerProcessor : AbstractProcessor() {
 		roundEnvironment
 				.getElementsAnnotatedWith(GencyclerViewHolder::class.java)
 				.forEach {
+
 					val typeElement = it as TypeElement
 
 					val holder = it.getAnnotation(GencyclerViewHolder::class.java)
 
 					val layoutName = valueNameLayoutMap[holder.value]
-					val dataTypeContainer = typeElement.asClassName()
+
+					var dataTypeCanonicalName = ""
+
+					val dataTypeContainer =
+							if (typeElement.typeParameters.isEmpty()) {
+								val dataType = typeElement.asClassName()
+								dataTypeCanonicalName = dataType.canonicalName
+								dataType
+							} else {
+								val dataType = typeElement.asClassName()
+										.parameterizedBy(*typeElement.typeParameters
+												.map { STAR }
+												.toTypedArray())
+
+								dataTypeCanonicalName = dataType.rawType.canonicalName
+								dataType
+							}
+
 
 					val layoutFile = File("$layoutFolder/$layoutName.xml")
 
@@ -84,7 +106,7 @@ class GencyclerProcessor : AbstractProcessor() {
 
 					viewHolders.add(viewHolder)
 
-					viewTypes[dataTypeContainer.canonicalName] =
+					viewTypes[dataTypeCanonicalName] =
 							ViewType(layoutName, dataTypeContainer, viewHolder.asClassName())
 				}
 
@@ -117,7 +139,7 @@ class GencyclerProcessor : AbstractProcessor() {
 					val generatedAdapter = Adapter(adapterName, adapterViewTypes,
 							clickable, longClickable, filterable)
 
-
+					EnvironmentUtil.generateOutputFile()
 					recyclerAdapterGenerator.generate(generatedAdapter)
 							.writeTo(EnvironmentUtil.generateOutputFile(generatedAdapter.name))
 
