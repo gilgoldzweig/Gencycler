@@ -12,7 +12,7 @@ import goldzweigapps.com.compiler.utils.simpleEnumName
 import goldzweigapps.com.compiler.utils.simpleParameterName
 
 
-class RecyclerAdapterGenerator {
+class RecyclerAdapterGenerator(private val rClass: ClassName) {
 
 	private val mutableList = ClassName(Packages.KOTLIN_COLLECTIONS, "MutableList")
 	private val contextClassName = ClassName(Packages.ANDROID_CONTENT, "Context")
@@ -119,7 +119,7 @@ class RecyclerAdapterGenerator {
 					recycleViewHolderCodeBuilder
 							.insertRecycleViewHolderCase(viewType, viewHolderSimpleName)
 
-					var dataType = viewType.dataContainerType
+					val dataType = viewType.dataContainerType
 
 					supportedViewTypesSimpleName.add(
 							when (dataType) {
@@ -257,8 +257,8 @@ class RecyclerAdapterGenerator {
 		return if (viewType != null) {
 			createViewHolderFunctionBuilder
 					.returns(viewType.viewHolderType)
-					.addStatement("return %T(inflate(R.layout.${viewType.layoutName}, parent))",
-							viewType.viewHolderType)
+					.addStatement("return %T(inflate(%T.layout.%L, parent))",
+							viewType.viewHolderType, rClass, viewType.layoutName)
 					.build()
 		} else {
 			if (codeBlockBuilder == null) {

@@ -1,5 +1,7 @@
 package goldzweigapps.com.compiler
 
+import com.google.common.graph.Graph
+import com.google.common.graph.GraphBuilder
 import com.squareup.kotlinpoet.*
 import goldzweigapps.com.annotations.annotations.*
 import goldzweigapps.com.compiler.models.Adapter
@@ -24,8 +26,6 @@ import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.MirroredTypesException
 import javax.lang.model.type.TypeMirror
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.sun.tools.doclint.Env
-import javax.lang.model.element.TypeParameterElement
 
 
 /**
@@ -53,7 +53,7 @@ class GencyclerProcessor : AbstractProcessor() {
 		layoutFolder = FileHelper.findModuleLayoutFolder(processingEnv)
 		valueNameLayoutMap = manifestFinder.generateLayoutValueMap(rClass)
 		viewHolderGenerator = ViewHolderGenerator(rClass)
-		recyclerAdapterGenerator = RecyclerAdapterGenerator()
+		recyclerAdapterGenerator = RecyclerAdapterGenerator(rClass)
 	}
 
 
@@ -139,7 +139,6 @@ class GencyclerProcessor : AbstractProcessor() {
 					val generatedAdapter = Adapter(adapterName, adapterViewTypes,
 							clickable, longClickable, filterable)
 
-					EnvironmentUtil.generateOutputFile()
 					recyclerAdapterGenerator.generate(generatedAdapter)
 							.writeTo(EnvironmentUtil.generateOutputFile(generatedAdapter.name))
 
