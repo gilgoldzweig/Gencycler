@@ -79,7 +79,7 @@ abstract class GencyclerRecyclerAdapter<T : GencyclerModel, VH : GencyclerHolder
 	 *
 	 * If updateUi is true then we will call [notifyItemRangeInserted]
 	 */
-	open fun add(elements: List<T>, position: Int = elements.size) {
+	open fun add(elements: List<T>, position: Int = this.elements.size) {
 		this.elements.addAll(position, elements)
 
 		if (!updateUi) return
