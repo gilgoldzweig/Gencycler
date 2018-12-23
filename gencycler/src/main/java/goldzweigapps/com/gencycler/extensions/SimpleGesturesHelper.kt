@@ -5,21 +5,37 @@ import android.support.v7.widget.helper.ItemTouchHelper
 import goldzweigapps.com.annotations.annotations.GencyclerModel
 import goldzweigapps.com.gencycler.GencyclerHolder
 import goldzweigapps.com.gencycler.GencyclerRecyclerAdapter
+import java.lang.UnsupportedOperationException
 
-class SimpleGesturesHelper(private val adapter:
-						   GencyclerRecyclerAdapter<GencyclerModel, GencyclerHolder>) :
-		ItemTouchHelper.Callback() {
+class SimpleGesturesHelper<in T: GencyclerRecyclerAdapter<out GencyclerModel, out GencyclerHolder>>(
+		private val adapter: T) : ItemTouchHelper.Callback() {
 
 	private val itemTouchHelper = ItemTouchHelper(this)
 	private var swipeEnabled: Boolean = false
 	private var dragEnabled: Boolean = false
 	private var longPressDragEnabled: Boolean = false
-	private val directions: HashSet<Int> = HashSet()
+	private var direction = -1
+	private val dragFlags = ItemTouchHelper.UP or ItemTouchHelper.DOWN
+
 
 
 	fun setSwipeEnabled(enabled: Boolean, vararg directions: Int) {
 		swipeEnabled = enabled
-		this.directions.addAll(directions.toTypedArray())
+		if (!swipeEnabled) {
+			direction = -1
+			return
+		}
+
+		direction = when {
+			directions.isEmpty() ->
+				throw UnsupportedOperationException("no directions we're provided for setSwipeEnabled")
+
+			directions.size > 1 ->
+				ItemTouchHelper.START or ItemTouchHelper.END
+
+			else ->
+				directions[0]
+		}
 	}
 
 	@JvmOverloads
@@ -41,16 +57,15 @@ class SimpleGesturesHelper(private val adapter:
 	}
 
 	override fun getMovementFlags(recyclerView: RecyclerView,
-								  holder: RecyclerView.ViewHolder): Int {
-
-		val dragFlags = ItemTouchHelper.UP or ItemTouchHelper.DOWN
-		val swipeFlags = ItemTouchHelper.START or ItemTouchHelper.END
-
-		return makeMovementFlags(dragFlags, swipeFlags)
-	}
+								  holder: RecyclerView.ViewHolder): Int =
+			makeMovementFlags(dragFlags, direction)
 
 	override fun onSwiped(holder: RecyclerView.ViewHolder, direction: Int) {
-		if (!swipeEnabled || direction !in directions) return
-		adapter.remove(holder.adapterPosition)
+		if (swipeEnabled) adapter.remove(holder.adapterPosition)
+	}
+
+	companion object {
+		const val START = ItemTouchHelper.START
+		const val END = ItemTouchHelper.END
 	}
 }
