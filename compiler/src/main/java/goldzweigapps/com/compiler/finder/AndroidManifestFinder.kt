@@ -128,7 +128,7 @@ class AndroidManifestFinder(private val environment: ProcessingEnvironment) {
 	@Throws(FileNotFoundException::class)
 	internal fun findManifestInKnownPathsStartingFromGenFolder(sourcesGenerationFolder: String): File? {
 
-		val strategies = listOf(GradleAndroidManifestFinderStrategy(environment, sourcesGenerationFolder),
+		val strategies = listOf(GradleAndroidManifestFinderStrategy(sourcesGenerationFolder),
 				MavenAndroidManifestFinderStrategy(sourcesGenerationFolder),
 				EclipseAndroidManifestFinderStrategy(sourcesGenerationFolder))
 
