@@ -1,31 +1,30 @@
 package goldzweigapps.com.compiler
 
-import com.google.common.graph.Graph
-import com.google.common.graph.GraphBuilder
-import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.STAR
+import com.squareup.kotlinpoet.asClassName
 import goldzweigapps.com.annotations.annotations.*
-import goldzweigapps.com.compiler.models.Adapter
-import goldzweigapps.com.compiler.models.ViewHolder
 import goldzweigapps.com.compiler.adapter.getNamingAdapter
 import goldzweigapps.com.compiler.finder.AndroidManifestFinder
 import goldzweigapps.com.compiler.generators.RecyclerAdapterGenerator
 import goldzweigapps.com.compiler.generators.ViewHolderGenerator
+import goldzweigapps.com.compiler.models.Adapter
+import goldzweigapps.com.compiler.models.ViewHolder
 import goldzweigapps.com.compiler.models.ViewType
 import goldzweigapps.com.compiler.models.asClassName
 import goldzweigapps.com.compiler.parser.XMLParser
-import goldzweigapps.com.compiler.utils.*
+import goldzweigapps.com.compiler.utils.EnvironmentUtil
+import goldzweigapps.com.compiler.utils.FileHelper
+import goldzweigapps.com.compiler.utils.Logger
 import java.io.File
-import java.lang.IllegalArgumentException
-import java.lang.annotation.AnnotationTypeMismatchException
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
-import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.MirroredTypesException
 import javax.lang.model.type.TypeMirror
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 
 
 /**
@@ -74,7 +73,7 @@ class GencyclerProcessor : AbstractProcessor() {
 
 					val layoutName = valueNameLayoutMap[holder.value]
 
-					var dataTypeCanonicalName = ""
+					val dataTypeCanonicalName: String
 
 					val dataTypeContainer =
 							if (typeElement.typeParameters.isEmpty()) {
@@ -136,7 +135,9 @@ class GencyclerProcessor : AbstractProcessor() {
 						adapter.customName
 					}
 
-					val generatedAdapter = Adapter(adapterName, adapterViewTypes,
+					val generatedAdapter = Adapter(adapterName,
+							EnvironmentUtil.getPackgeName(it),
+							adapterViewTypes,
 							clickable, longClickable, filterable)
 
 					recyclerAdapterGenerator.generate(generatedAdapter)

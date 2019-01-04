@@ -8,6 +8,6 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     api project(':annotations')
     implementation "com.squareup:kotlinpoet:$kotlin_poet"
-    implementation 'com.google.guava:guava:27.0.1-android'
+    implementation "com.google.guava:guava:$guava"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

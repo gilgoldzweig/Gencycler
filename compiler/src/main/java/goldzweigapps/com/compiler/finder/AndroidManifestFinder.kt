@@ -52,96 +52,115 @@ import javax.lang.model.util.ElementFilter
 
 class AndroidManifestFinder(private val environment: ProcessingEnvironment) {
 
+	private val fileNotFoundException = FileNotFoundException("R class was not found")
+	private val rClassOption = EnvironmentUtil.getOptionValue(Options.OPTION_R_CLASS)
+	private val useR2Option = EnvironmentUtil.getOptionBoolean(Options.OPTION_USE_R2)
+	private val androidManifestFile = EnvironmentUtil.getOptionValue(Options.OPTION_MANIFEST)
+	private val rClassSimpleName = if (useR2Option) "R2" else "R"
 
-    @Throws(FileNotFoundException::class)
-    fun findManifestFile(): File? {
-        val androidManifestFile = EnvironmentUtil.getOptionValue(Options.OPTION_MANIFEST)
-        return if (androidManifestFile != null) {
-            findManifestInSpecifiedPath(androidManifestFile)
-        } else {
-            findManifestInKnownPaths()
-        }
-    }
+	@Throws(FileNotFoundException::class)
+	fun findManifestFile(): File? {
 
-    @Throws(FileNotFoundException::class)
-    fun findRClass(): ClassName {
-        val fileNotFoundException = FileNotFoundException("R class was not found")
-        val manifestFile = findManifestFile() ?: throw fileNotFoundException
+		return if (androidManifestFile != null) {
+			findManifestInSpecifiedPath(androidManifestFile)
+		} else {
+			findManifestInKnownPaths()
+		}
+	}
 
-        val packageName =
-                XMLParser.findAttributeByName(manifestFile,
-                        "package") ?: throw fileNotFoundException
+	@Throws(FileNotFoundException::class)
+	fun findRClass(): ClassName {
 
-        return ClassName(packageName, "R")
-    }
 
-    fun generateLayoutValueMap(rClass: ClassName): Map<Int, String> {
-        val valueNameMap = HashMap<Int, String>()
-        val elements = EnvironmentUtil.elementUtils().getTypeElement("$rClass.layout").enclosedElements
+		if (rClassOption != null) {
+			return ClassName(rClassOption, rClassSimpleName)
+		}
 
-        ElementFilter.fieldsIn(elements)?.forEach {
-            val fieldType = it.asType().kind
-            if (fieldType.isPrimitive && fieldType == TypeKind.INT) {
-                valueNameMap[it.constantValue as Int] = it.simpleName.toString()
-            }
-        }
-        return valueNameMap
-    }
+		val manifestFile = findManifestFile() ?: throw fileNotFoundException
 
-    @Throws(FileNotFoundException::class)
-    private fun findManifestInSpecifiedPath(androidManifestPath: String): File {
-        val androidManifestFile = File(androidManifestPath)
-        if (!androidManifestFile.exists()) {
-            Logger.e("Could not find the AndroidManifest.xml file in specified path: $androidManifestPath")
-            throw FileNotFoundException()
-        } else {
-            Logger.d("AndroidManifest.xml file found with specified path: $androidManifestFile")
-        }
-        return androidManifestFile
-    }
+		val packageName =
+				XMLParser.findAttributeByName(manifestFile,
+						"package") ?: throw fileNotFoundException
 
-    @Throws(FileNotFoundException::class)
-    private fun findManifestInKnownPaths(): File? {
-        val (_, sourcesGenerationFolder) = FileHelper.findRootProjectHolder(environment)
-        return findManifestInKnownPathsStartingFromGenFolder(sourcesGenerationFolder.absolutePath)
-    }
+		return ClassName(packageName, rClassSimpleName)
+	}
 
-    @Throws(FileNotFoundException::class)
-    internal fun findManifestInKnownPathsStartingFromGenFolder(sourcesGenerationFolder: String): File? {
+	fun generateLayoutValueMap(rClass: ClassName): Map<Int, String> {
+		val valueNameMap = HashMap<Int, String>()
 
-        val strategies = listOf(GradleAndroidManifestFinderStrategy(environment, sourcesGenerationFolder),
-                MavenAndroidManifestFinderStrategy(sourcesGenerationFolder),
-                EclipseAndroidManifestFinderStrategy(sourcesGenerationFolder))
+		val layoutTypeElement = EnvironmentUtil.elementUtils()
+				.getTypeElement("$rClass.layout")
 
-        var applyingStrategy: AndroidManifestFinderStrategy? = null
+		if (layoutTypeElement == null) {
+			Logger.e("R.Layout was not found, Are you using multi flavors?")
+			return valueNameMap
+		}
 
-        for (strategy in strategies) {
-            if (strategy.applies()) {
-                applyingStrategy = strategy
-                break
-            }
-        }
+		ElementFilter
+				.fieldsIn(layoutTypeElement.enclosedElements)?.forEach {
+					val fieldType = it.asType().kind
+					if (fieldType.isPrimitive && fieldType == TypeKind.INT) {
+						valueNameMap[it.constantValue as Int] = it.simpleName.toString()
+					}
+				}
 
-        var androidManifestFile: File? = null
+		return valueNameMap
+	}
 
-        if (applyingStrategy != null) {
-            androidManifestFile = applyingStrategy.findAndroidManifestFile()
-        }
+	@Throws(FileNotFoundException::class)
+	private fun findManifestInSpecifiedPath(androidManifestPath: String): File {
+		val androidManifestFile = File(androidManifestPath)
+		if (!androidManifestFile.exists()) {
+			Logger.e("Could not find the AndroidManifest.xml file in specified path: $androidManifestPath")
+			throw FileNotFoundException()
+		} else {
+			Logger.d("AndroidManifest.xml file found with specified path: $androidManifestFile")
+		}
+		return androidManifestFile
+	}
 
-        if (androidManifestFile != null) {
-            Logger.d("""
+	@Throws(FileNotFoundException::class)
+	private fun findManifestInKnownPaths(): File? {
+		val (_, sourcesGenerationFolder) = FileHelper.findRootProjectHolder(environment)
+		return findManifestInKnownPathsStartingFromGenFolder(sourcesGenerationFolder.absolutePath)
+	}
+
+	@Throws(FileNotFoundException::class)
+	internal fun findManifestInKnownPathsStartingFromGenFolder(sourcesGenerationFolder: String): File? {
+
+		val strategies = listOf(GradleAndroidManifestFinderStrategy(environment, sourcesGenerationFolder),
+				MavenAndroidManifestFinderStrategy(sourcesGenerationFolder),
+				EclipseAndroidManifestFinderStrategy(sourcesGenerationFolder))
+
+		var applyingStrategy: AndroidManifestFinderStrategy? = null
+
+		for (strategy in strategies) {
+			if (strategy.applies()) {
+				applyingStrategy = strategy
+				break
+			}
+		}
+
+		var androidManifestFile: File? = null
+
+		if (applyingStrategy != null) {
+			androidManifestFile = applyingStrategy.findAndroidManifestFile()
+		}
+
+		if (androidManifestFile != null) {
+			Logger.d("""
                 ${applyingStrategy!!.name} AndroidManifest.xml file found
                 using generation folder $sourcesGenerationFolder: $androidManifestFile
             """.trimIndent())
-        } else {
-            Logger.e("""
+		} else {
+			Logger.e("""
                 Could not find the AndroidManifest.xml file,
                 using generation folder $sourcesGenerationFolder
             """.trimIndent())
-        }
+		}
 
-        return androidManifestFile
-    }
+		return androidManifestFile
+	}
 
 }
 

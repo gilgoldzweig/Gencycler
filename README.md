@@ -1,5 +1,6 @@
 
 # Gencycler
+<<<<<<< HEAD
 [![latest version](https://jitpack.io/v/gilgoldzweig/Gencycler.svg)](https://jitpack.io/#gilgoldzweig/Gencycler)
 
 
@@ -24,6 +25,13 @@ which means you only need to worry about your logic and not about the adapter
 - Comes with useful Helpers
 - No runtime cost - everything happens at compile-time
 - Multi flavor support
+=======
+ ![Release](https://jitpack.io/v/gilgoldzweig/Gencycler.svg)
+### Gencycler works in compile time so no runtime performance impact,
+Gencycler will generated a readable multi view type RecyclerView Adapter with a thread-safe accessing mechanism.
+Gencycler eliminates The need to write all of the boilerplate code needed for writing an adapter and
+leaves you with only the bare minimum needed to write your business logic.
+>>>>>>> master
 
 
 # Implement in your project

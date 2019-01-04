@@ -7,7 +7,6 @@ import java.io.FileReader
 import java.io.IOException
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-import javax.annotation.processing.ProcessingEnvironment
 
 sealed class AndroidManifestFinderStrategy(internal val name: String, sourceFolderPattern: Pattern,
                                            sourceFolder: String) {
@@ -30,8 +29,7 @@ sealed class AndroidManifestFinderStrategy(internal val name: String, sourceFold
     internal abstract fun possibleLocations(): Iterable<String>
 }
 
-class GradleAndroidManifestFinderStrategy(private val environment: ProcessingEnvironment,
-                                          sourceFolder: String) :
+class GradleAndroidManifestFinderStrategy(sourceFolder: String) :
         AndroidManifestFinderStrategy("Gradle", GRADLE_GEN_FOLDER, sourceFolder) {
 
     private val directories = listOf("build/intermediates/manifests/full",
@@ -40,7 +38,6 @@ class GradleAndroidManifestFinderStrategy(private val environment: ProcessingEnv
 
     override fun possibleLocations(): Iterable<String> {
         val path = matcher.group(1)
-        val mode = matcher.group(2)
         val gradleVariant = matcher.group(3)
         val variantPart = gradleVariant.substring(1)
 
@@ -88,9 +85,8 @@ class GradleAndroidManifestFinderStrategy(private val environment: ProcessingEnv
 
     }
 
-    private fun findPossibleLocationsV32(basePath: String, variantPart: String, possibleLocations: MutableList<String>) {
-        var variantPart = variantPart
-        val directories = File(basePath + BUILD_TOOLS_V32_MANIFEST_PATH).list() ?: return
+    private fun findPossibleLocationsV32(basePath: String, variant: String, possibleLocations: MutableList<String>) {
+        var variantPart = variant
 
         if (variantPart.startsWith("/") || variantPart.startsWith("\\")) {
             variantPart = variantPart.substring(1)
@@ -107,7 +103,7 @@ class GradleAndroidManifestFinderStrategy(private val environment: ProcessingEnv
             variantPart = sb.toString()
         }
 
-        var possibleLocation = "$BUILD_TOOLS_V32_MANIFEST_PATH/$variantPart"
+        val possibleLocation = "$BUILD_TOOLS_V32_MANIFEST_PATH/$variantPart"
 
         findPossibleLocations(basePath, possibleLocations, possibleLocation)
         findPossibleLocations(basePath, possibleLocations, possibleLocation + "/process" + upperCaseFirst(variantPart) + "Manifest/merged")
@@ -120,8 +116,8 @@ class GradleAndroidManifestFinderStrategy(private val environment: ProcessingEnv
         }
     }
 
-    private fun findPossibleLocations(basePath: String, targetPath: String, variantPart: String, possibleLocations: MutableList<String>) {
-        var variantPart = variantPart
+    private fun findPossibleLocations(basePath: String, targetPath: String, variant: String, possibleLocations: MutableList<String>) {
+        var variantPart = variant
         val directories = File(basePath + targetPath).list() ?: return
 
         if (variantPart.startsWith("/") || variantPart.startsWith("\\")) {
@@ -133,7 +129,7 @@ class GradleAndroidManifestFinderStrategy(private val environment: ProcessingEnv
             val variantDir = File(basePath + possibleLocation)
             if (variantDir.isDirectory && variantPart.toLowerCase().startsWith(directory.toLowerCase())) {
                 val remainingPart = variantPart.substring(directory.length)
-                if (remainingPart.length == 0) {
+                if (remainingPart.isEmpty()) {
                     possibleLocations.add(possibleLocation)
                     addPossibleSplitLocations(basePath, possibleLocation, possibleLocations)
                 } else {
@@ -175,14 +171,14 @@ class GradleAndroidManifestFinderStrategy(private val environment: ProcessingEnv
         private const val BUILD_TOOLS_V32_MANIFEST_PATH = "build/intermediates/merged_manifests"
     }
 
-    private fun lowerCaseFirst(string: String): String {
-        if (string.length < 2)
-            return string.toLowerCase()
-
-        val first = string.substring(0, 1).toLowerCase()
-        val end = string.substring(1, string.length)
-        return first + end
-    }
+//    private fun lowerCaseFirst(string: String): String {
+//        if (string.length < 2)
+//            return string.toLowerCase()
+//
+//        val first = string.substring(0, 1).toLowerCase()
+//        val end = string.substring(1, string.length)
+//        return first + end
+//    }
 
     private fun upperCaseFirst(string: String): String {
         if (string.length < 2)

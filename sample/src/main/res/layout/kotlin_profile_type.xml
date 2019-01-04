@@ -16,7 +16,4 @@
             android:id="@+id/type_three_three_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
-    <include
-            android:id="@+id/included_java_profile"
-            layout="@layout/java_profile_type"/>
 </LinearLayout>

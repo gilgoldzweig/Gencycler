@@ -37,7 +37,7 @@ class RecyclerAdapterGenerator(private val rClass: ClassName) {
 
 	fun generate(adapter: Adapter): FileSpec {
 
-		val adapterFileBuilder = FileSpec.builder(Packages.GENCYCLER, adapter.name)
+		val adapterFileBuilder = FileSpec.builder(adapter.packageName, adapter.name)
 				.addAnnotation(AnnotationSpec.builder(JvmName::class)
 						.useSiteTarget(AnnotationSpec.UseSiteTarget.FILE)
 						.addMember("\"${adapter.name}\"")
@@ -69,6 +69,7 @@ class RecyclerAdapterGenerator(private val rClass: ClassName) {
 				val viewHolder = viewType.viewHolderType
 
 				val dataType = viewType.dataContainerType
+
 
 				parametrizedType = dataType
 

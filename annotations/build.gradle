@@ -5,9 +5,8 @@ apply plugin: 'com.github.dcendents.android-maven'
 group='com.github.gilgoldzweig'
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    compile "com.android.support:support-annotations:$suppprt"
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "com.android.support:support-annotations:$suppprt"
 }
 
 sourceCompatibility = "1.7"

@@ -16,6 +16,7 @@ import kotlin.reflect.KClass
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.CLASS)
 @Repeatable
+@MustBeDocumented
 annotation class GencyclerAdapter(vararg val value: KClass<out GencyclerModel>,
 								  val customName: String = "")
 

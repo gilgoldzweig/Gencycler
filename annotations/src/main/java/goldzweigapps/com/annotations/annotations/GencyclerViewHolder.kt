@@ -28,6 +28,7 @@ import android.support.annotation.LayoutRes
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.CLASS)
 @Repeatable
+@MustBeDocumented
 annotation class GencyclerViewHolder(@LayoutRes val value: Int,
 									 val namingCase: NamingCase = NamingCase.NAMING_CASE_CAMEL)
 

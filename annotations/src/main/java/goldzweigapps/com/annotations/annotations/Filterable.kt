@@ -7,4 +7,5 @@ package goldzweigapps.com.annotations.annotations
 
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.CLASS)
+@MustBeDocumented
 annotation class Filterable
