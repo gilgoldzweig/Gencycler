@@ -46,6 +46,6 @@ class Options(processingEnvironment: ProcessingEnvironment) {
         val OPTION_MANIFEST = Option("androidManifestFile")
         val OPTION_USE_R2 = Option("androidUseR2")
         val OPTION_RESOURCE_FOLDER = Option("resourcesFolder", "main")
-        val OPTION_R_CLASS= Option("rClassPackage")
+        val OPTION_R_CLASS = Option("rClassPackage")
     }
 }
