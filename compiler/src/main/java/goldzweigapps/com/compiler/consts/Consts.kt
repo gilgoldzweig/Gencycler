@@ -76,13 +76,19 @@ object Packages {
 	const val ANDROID_VIEW = "android.view"
 	const val SUPPORT_WIDGET = "android.support.v7.widget"
 	const val ANDROID_WIDGET = "android.widget"
-
+	const val SUPPORT_ANNOTATION = "android.support.annotation"
 	const val KOTLIN_COLLECTIONS = "kotlin.collections"
 }
 
 object Parameters {
+
 	val VIEW_CLASS_NAME = ClassName(Packages.ANDROID_VIEW, "View")
 
+	val MOTION_EVENT_CLASS_NAME = ClassName(Packages.ANDROID_VIEW, "MotionEvent")
+
+	val MOTION_EVENT_PARAMETER_SPEC = ParameterSpec
+			.builder(Names.MOTION_EVENT, MOTION_EVENT_CLASS_NAME)
+			.build()
 
 	val VIEW_PARAMETER_SPEC = ParameterSpec
 			.builder(Names.VIEW, VIEW_CLASS_NAME)
@@ -105,6 +111,8 @@ object Parameters {
 
 	val ILLEGAL_ARGUMENT_EXCEPTION_CLASS =
 			IllegalArgumentException::class.asTypeName()
+
+	val CALL_SUPER_ANNOTATION = ClassName(Packages.SUPPORT_ANNOTATION, "CallSuper")
 }
 
 object Methods {
@@ -128,13 +136,14 @@ object Names {
 	const val ELEMENT = "element"
 	const val CONTEXT = "context"
 	const val UPDATE_UI = "updateUi"
-	const val ID = "id"
+	const val MOTION_EVENT = "event"
 	const val POSITION = "position"
 	const val MULTI_LINE_ESCAPED = "\"\"\""
 	const val ON_CLICK_LISTENER = "onItemClickListener"
 	const val ON_LONG_CLICK_LISTENER = "onItemLongClickListener"
 	const val FILTER = "filter"
 	const val CONSTRAINT = "constraint"
+	const val ACTION_LISTENER = "onActionListener"
 }
 
 

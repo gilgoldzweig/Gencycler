@@ -31,28 +31,34 @@ class ViewHolderGenerator(private val rClass: ClassName) {
         val identificationEnum = generateIdentificationEnum()
         val identificationEnumCodeBlockBuilder = CodeBlock.Builder()
 
-        for ((index, holder) in viewHolders.withIndex()) {
+        return if (viewHolders.size == 1) {
+            fileBuilder.addType(generateViewHolder(viewHolders.first()))
+        } else {
 
-            val simpleEnumName = holder.asClassName().simpleEnumName
+            for ((index, holder) in viewHolders.withIndex()) {
 
-            val (enumConstantName, enumConstantValue) =
-                    generateEnumConstant(simpleEnumName, holder.layoutName, index)
+                val simpleEnumName = holder.asClassName().simpleEnumName
 
-            fileBuilder.addType(generateViewHolder(holder))
+                val (enumConstantName, enumConstantValue) =
+                        generateEnumConstant(simpleEnumName, holder.layoutName, index)
+
+                fileBuilder.addType(generateViewHolder(holder))
 
 
-            identificationEnum
-                    .addEnumConstant(enumConstantName, enumConstantValue)
+                identificationEnum
+                        .addEnumConstant(enumConstantName, enumConstantValue)
 
-            identificationEnumCodeBlockBuilder
-                    .insertViewHolderEnumCase(index, simpleEnumName)
+                identificationEnumCodeBlockBuilder
+                        .insertViewHolderEnumCase(index, simpleEnumName)
 
-        }
+            }
 
-        return fileBuilder
-                .addType(identificationEnum
-                        .buildIdentificationEnum(identificationEnumCodeBlockBuilder))
-                .build()
+            fileBuilder
+                    .addType(identificationEnum
+                            .buildIdentificationEnum(identificationEnumCodeBlockBuilder))
+        }.build()
+
+
     }
 
 
@@ -85,18 +91,22 @@ class ViewHolderGenerator(private val rClass: ClassName) {
     }
 
     private fun generateViewHolder(holder: ViewHolder): TypeSpec {
-        return TypeSpec.classBuilder(holder.asClassName())
-                .addKdoc(KDocs.VIEW_HOLDER_FUNC, rClass, holder.layoutName)
-                .primaryConstructor(FunSpec.constructorBuilder()
-                        .addParameter(Parameters.VIEW_PARAMETER_SPEC)
-                        .build())
-                .superclass(Parameters.VIEW_HOLDER_SUPER_CLASS)
-                .addSuperclassConstructorParameter(Names.VIEW)
-                .addProperties(holder.viewFields.map {
-                    generateViewProperty(it, holder.namingAdapter)
-                })
-                .build()
+
+        val viewHolderClassBuilder =
+                TypeSpec.classBuilder(holder.asClassName())
+                        .addKdoc(KDocs.VIEW_HOLDER_FUNC, rClass, holder.layoutName)
+                        .primaryConstructor(FunSpec.constructorBuilder()
+                                .addParameter(Parameters.VIEW_PARAMETER_SPEC)
+                                .build())
+                        .superclass(Parameters.VIEW_HOLDER_SUPER_CLASS)
+                        .addSuperclassConstructorParameter(Names.VIEW)
+                        .addProperties(holder.viewFields.map {
+                            generateViewProperty(it, holder.namingAdapter)
+                        })
+
+        return viewHolderClassBuilder.build()
     }
+
 
     private fun generateViewProperty(viewField: ViewField,
                                      namingAdapter: NamingAdapter): PropertySpec {

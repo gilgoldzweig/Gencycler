@@ -2,11 +2,12 @@ apply plugin: 'java-library'
 apply plugin: 'kotlin'
 apply plugin: 'com.github.dcendents.android-maven'
 
-group='com.github.gilgoldzweig'
+group = 'com.github.gilgoldzweig'
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "com.android.support:support-annotations:$suppprt"
+  implementation fileTree(dir: 'libs', include: ['*.jar'])
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation "com.android.support:support-annotations:$suppprt"
 }
 
 sourceCompatibility = "1.7"

@@ -1,5 +1,7 @@
 package goldzweigapps.com.compiler.models
 
+import goldzweigapps.com.annotations.annotations.Actions
+
 
 /**
  * Created by gilgoldzweig on 08/02/2018.
@@ -7,6 +9,4 @@ package goldzweigapps.com.compiler.models
 data class Adapter(val name: String,
 				   val packageName: String,
                    val viewTypes: List<ViewType>,
-				   val clickable: Boolean = false,
-				   val longClickable: Boolean = false,
-				   val filterable: Boolean = false)
+				   val actions: Array<out Actions>)

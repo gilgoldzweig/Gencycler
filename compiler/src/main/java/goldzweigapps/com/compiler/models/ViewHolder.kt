@@ -1,6 +1,7 @@
 package goldzweigapps.com.compiler.models
 
 import com.squareup.kotlinpoet.ClassName
+import com.sun.org.apache.xpath.internal.operations.Bool
 import goldzweigapps.com.compiler.adapter.NamingAdapter
 import goldzweigapps.com.compiler.consts.Packages
 

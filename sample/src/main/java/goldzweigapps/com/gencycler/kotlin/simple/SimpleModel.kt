@@ -1,8 +1,6 @@
 package goldzweigapps.com.gencycler.kotlin.simple
 
-import goldzweigapps.com.annotations.annotations.GencyclerModel
-import goldzweigapps.com.annotations.annotations.GencyclerViewHolder
-import goldzweigapps.com.annotations.annotations.NamingCase
+import goldzweigapps.com.annotations.annotations.*
 import goldzweigapps.com.gencycler.R
 
 
@@ -10,7 +8,8 @@ import goldzweigapps.com.gencycler.R
 data class SimpleModel(val name: String,
 					   val description: String) : GencyclerModel
 
-@GencyclerViewHolder(R.layout.kotlin_profile_type)
+@GencyclerViewHolder(R.layout.empty_test)
+@GencyclerActions([Actions.CLICK, Actions.LONG_CLICK])
 data class AnotherSimpleModel<T : CharSequence, K: Any>(val name: String,
 												val description: String,
 												val t: T) : GencyclerModel

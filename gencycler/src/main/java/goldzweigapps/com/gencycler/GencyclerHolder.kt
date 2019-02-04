@@ -1,7 +1,9 @@
 package goldzweigapps.com.gencycler
 
+import android.support.annotation.CallSuper
 import android.support.annotation.IdRes
 import android.support.v7.widget.RecyclerView
+import android.view.MotionEvent
 import android.view.View
 
 /**
@@ -22,4 +24,17 @@ open class GencyclerHolder(view: View) : RecyclerView.ViewHolder(view) {
     open fun onLongClicked(onLongClicked: (view: View) -> Boolean) {
         itemView.setOnLongClickListener(onLongClicked::invoke)
     }
+
+    open fun onTouch(onTouch: (view: View, even: MotionEvent) -> Boolean) {
+        itemView.setOnTouchListener(onTouch::invoke)
+    }
+
+    fun recycle() {
+        itemView.setOnTouchListener(null)
+        itemView.setOnClickListener(null)
+        itemView.setOnLongClickListener(null)
+    }
+
 }
+
+

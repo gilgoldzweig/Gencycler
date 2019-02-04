@@ -32,10 +32,9 @@ object EnvironmentUtil {
     fun getOptionBoolean(option: Option): Boolean =
             options.getBoolean(option)
 
-
-
+    
     fun generateOutputFile(fileSimpleName: String): File =
-        File(filer.getResource(StandardLocation.SOURCE_OUTPUT,"", "$fileSimpleName.kt")
+        File(filer.getResource(StandardLocation.SOURCE_OUTPUT, "", "$fileSimpleName.kt")
                 .toUri())
 
     fun getPackgeName(element: Element): String =

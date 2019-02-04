@@ -21,31 +21,13 @@ package goldzweigapps.com.compiler.finder
 
 import com.squareup.kotlinpoet.ClassName
 import goldzweigapps.com.compiler.parser.XMLParser
-import java.io.BufferedReader
+import goldzweigapps.com.compiler.utils.EnvironmentUtil
+import goldzweigapps.com.compiler.utils.FileHelper
+import goldzweigapps.com.compiler.utils.Logger
+import goldzweigapps.com.compiler.utils.Options
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileNotFoundException
-import java.io.FileReader
-import java.io.IOException
-import java.util.ArrayList
-import java.util.Arrays
-import java.util.Collections
-import java.util.HashMap
-import java.util.Properties
-import java.util.regex.Matcher
-import java.util.regex.Pattern
-
-import javax.lang.model.util.Elements
-import javax.xml.parsers.DocumentBuilder
-import javax.xml.parsers.DocumentBuilderFactory
-
-import goldzweigapps.com.compiler.models.Option
-import goldzweigapps.com.compiler.utils.*
-import org.w3c.dom.Document
-import org.w3c.dom.Element
-import org.w3c.dom.NamedNodeMap
-import org.w3c.dom.Node
-import org.w3c.dom.NodeList
+import java.util.*
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.type.TypeKind
 import javax.lang.model.util.ElementFilter
@@ -79,8 +61,10 @@ class AndroidManifestFinder(private val environment: ProcessingEnvironment) {
 		val manifestFile = findManifestFile() ?: throw fileNotFoundException
 
 		val packageName =
-				XMLParser.findAttributeByName(manifestFile,
-						"package") ?: throw fileNotFoundException
+			XMLParser.findAttributeByName(
+				manifestFile,
+				"package"
+			) ?: throw fileNotFoundException
 
 		return ClassName(packageName, rClassSimpleName)
 	}
@@ -89,7 +73,7 @@ class AndroidManifestFinder(private val environment: ProcessingEnvironment) {
 		val valueNameMap = HashMap<Int, String>()
 
 		val layoutTypeElement = EnvironmentUtil.elementUtils()
-				.getTypeElement("$rClass.layout")
+			.getTypeElement("$rClass.layout")
 
 		if (layoutTypeElement == null) {
 			Logger.e("R.Layout was not found, Are you using multi flavors?")
@@ -97,12 +81,13 @@ class AndroidManifestFinder(private val environment: ProcessingEnvironment) {
 		}
 
 		ElementFilter
-				.fieldsIn(layoutTypeElement.enclosedElements)?.forEach {
-					val fieldType = it.asType().kind
-					if (fieldType.isPrimitive && fieldType == TypeKind.INT) {
-						valueNameMap[it.constantValue as Int] = it.simpleName.toString()
-					}
+			.fieldsIn(layoutTypeElement.enclosedElements)
+			?.forEach {
+				val fieldType = it.asType().kind
+				if (fieldType.isPrimitive && fieldType == TypeKind.INT) {
+					valueNameMap[it.constantValue as Int] = it.simpleName.toString()
 				}
+			}
 
 		return valueNameMap
 	}
@@ -128,9 +113,11 @@ class AndroidManifestFinder(private val environment: ProcessingEnvironment) {
 	@Throws(FileNotFoundException::class)
 	internal fun findManifestInKnownPathsStartingFromGenFolder(sourcesGenerationFolder: String): File? {
 
-		val strategies = listOf(GradleAndroidManifestFinderStrategy(sourcesGenerationFolder),
-				MavenAndroidManifestFinderStrategy(sourcesGenerationFolder),
-				EclipseAndroidManifestFinderStrategy(sourcesGenerationFolder))
+		val strategies = listOf(
+			GradleAndroidManifestFinderStrategy(sourcesGenerationFolder),
+			MavenAndroidManifestFinderStrategy(sourcesGenerationFolder),
+			EclipseAndroidManifestFinderStrategy(sourcesGenerationFolder)
+		)
 
 		var applyingStrategy: AndroidManifestFinderStrategy? = null
 
@@ -148,15 +135,19 @@ class AndroidManifestFinder(private val environment: ProcessingEnvironment) {
 		}
 
 		if (androidManifestFile != null) {
-			Logger.d("""
+			Logger.d(
+				"""
                 ${applyingStrategy!!.name} AndroidManifest.xml file found
                 using generation folder $sourcesGenerationFolder: $androidManifestFile
-            """.trimIndent())
+            """.trimIndent()
+			)
 		} else {
-			Logger.e("""
+			Logger.e(
+				"""
                 Could not find the AndroidManifest.xml file,
                 using generation folder $sourcesGenerationFolder
-            """.trimIndent())
+            """.trimIndent()
+			)
 		}
 
 		return androidManifestFile
