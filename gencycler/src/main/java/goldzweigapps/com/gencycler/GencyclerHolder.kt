@@ -25,9 +25,10 @@ open class GencyclerHolder(view: View) : RecyclerView.ViewHolder(view) {
         itemView.setOnLongClickListener(onLongClicked::invoke)
     }
 
-    open fun onTouch(onTouch: (view: View, even: MotionEvent) -> Boolean) {
+    open fun onTouched(onTouch: (view: View, even: MotionEvent) -> Boolean) {
         itemView.setOnTouchListener(onTouch::invoke)
     }
+
 
     fun recycle() {
         itemView.setOnTouchListener(null)

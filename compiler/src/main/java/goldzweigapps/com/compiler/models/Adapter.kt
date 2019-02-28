@@ -1,5 +1,6 @@
 package goldzweigapps.com.compiler.models
 
+import com.squareup.kotlinpoet.TypeSpec
 import goldzweigapps.com.annotations.annotations.Actions
 
 
@@ -9,4 +10,5 @@ import goldzweigapps.com.annotations.annotations.Actions
 data class Adapter(val name: String,
 				   val packageName: String,
                    val viewTypes: List<ViewType>,
-				   val actions: Array<out Actions>)
+				   val actions: Array<out Actions>,
+				   val listenerInterface: TypeSpec? = null)

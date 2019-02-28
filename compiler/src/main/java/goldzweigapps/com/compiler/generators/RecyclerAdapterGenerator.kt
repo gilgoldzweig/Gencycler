@@ -29,11 +29,7 @@ class RecyclerAdapterGenerator(private val rClass: ClassName) {
     private var androidFilterClassName = ClassName(Packages.ANDROID_WIDGET,
             "Filter")
 
-    private val itemClickListenerClassName = ClassName(Packages.GENCYCLER_LISTENERS,
-            "OnItemClickedListener")
-
-    private val itemLongClickListenerClassName = ClassName(Packages.GENCYCLER_LISTENERS,
-            "OnItemLongClickedListener")
+    private var actionListenerClassName: ClassName? = null
 
     fun generate(adapter: Adapter): FileSpec {
 
@@ -46,25 +42,17 @@ class RecyclerAdapterGenerator(private val rClass: ClassName) {
         val adapterClassBuilder = TypeSpec.classBuilder(adapter.name)
                 .addKdoc(KDocs.ADAPTER_CLASS)
 
+        adapter.listenerInterface?.let {
+            adapterClassBuilder.addType(it)
+            actionListenerClassName = ClassName("${adapter.packageName}.${adapter.name}",
+                    "ActionsListener")
+        }
+
         val adapterConstructor = FunSpec.constructorBuilder()
                 .jvmOverloads()
                 .addParameter(ParameterSpec
                         .builder(Names.CONTEXT, contextClassName)
                         .build())
-
-        if (!adapter.actions.isEmpty()) {
-            adapterConstructor
-                    .addParameter(Names.ACTION_LISTENER, ClassName(adapter.packageName,
-                            "ActionsListener"))
-            adapterClassBuilder
-                    .addProperty(PropertySpec
-                            .builder(Names.ACTION_LISTENER, ClassName(adapter.packageName,
-                                    "ActionsListener"))
-                            .initializer(Names.ACTION_LISTENER)
-                            .mutable(true)
-                            .build())
-
-        }
 
 
         val setupFunctions = ArrayList<FunSpec>()
@@ -156,8 +144,7 @@ class RecyclerAdapterGenerator(private val rClass: ClassName) {
 
                 setupFunctions.addAll(listOf(
                         generateCreateViewHolderFunc(
-                                codeBlockBuilder = createViewHolderCodeBuilder,
-                                supportViewTypesNames = supportedViewTypesSimpleName),
+                                codeBlockBuilder = createViewHolderCodeBuilder),
 
                         generateBindViewHolderFunc(
                                 codeBlockBuilder = bindViewHolderCodeBuilder),
@@ -203,45 +190,25 @@ class RecyclerAdapterGenerator(private val rClass: ClassName) {
                         mutableList.parameterizedBy(parametrizedType))
                         .defaultValue("ArrayList()")
                         .build())
+        if (actionListenerClassName != null) {
+            adapterConstructor
+                    .addParameter(Names.ACTION_LISTENER, actionListenerClassName!!)
+
+            adapterClassBuilder
+                    .addProperty(PropertySpec
+                            .builder(Names.ACTION_LISTENER, actionListenerClassName!!)
+                            .initializer(Names.ACTION_LISTENER)
+                            .mutable(true)
+                            .build())
+
+        }
+
+        adapterConstructor
                 .addParameter(ParameterSpec.builder(Names.UPDATE_UI, BOOLEAN)
                         .defaultValue("true")
                         .build())
 
-//        if (adapter.clickable) {
-//            val onClickName = Names.ON_CLICK_LISTENER
-//            val onClickType = itemClickListenerClassName.parameterizedBy(parametrizedType)
-//
-//            adapterConstructor
-//                    .addParameter(ParameterSpec
-//                            .builder(onClickName, onClickType)
-//                            .build())
-//
-//            adapterClassBuilder
-//                    .addProperty(PropertySpec
-//                            .builder(onClickName, onClickType)
-//                            .initializer(onClickName)
-//                            .mutable()
-//                            .build())
-//        }
-//
-//        if (adapter.longClickable) {
-//            val onClickName = Names.ON_LONG_CLICK_LISTENER
-//            val onClickType = itemLongClickListenerClassName.parameterizedBy(parametrizedType)
-//
-//            adapterConstructor
-//                    .addParameter(ParameterSpec
-//                            .builder(onClickName, onClickType)
-//                            .build())
-//
-//            adapterClassBuilder
-//                    .addProperty(PropertySpec.builder(onClickName, onClickType)
-//                            .initializer(onClickName)
-//                            .mutable()
-//                            .build())
-//                    .build()
-//        }
-
-        return adapterFileBuilder
+        adapterFileBuilder
                 .addType(adapterClassBuilder
                         .addModifiers(KModifier.ABSTRACT)
                         .primaryConstructor(adapterConstructor.build())
@@ -251,14 +218,15 @@ class RecyclerAdapterGenerator(private val rClass: ClassName) {
                                 Names.UPDATE_UI)
                         .addFunctions(setupFunctions)
                         .addFunctions(abstractFunctions)
+
                         .build())
-                .build()
+
+        return adapterFileBuilder.build()
     }
 
 
     private fun generateCreateViewHolderFunc(viewType: ViewType? = null,
-                                             codeBlockBuilder: CodeBlock.Builder? = null,
-                                             supportViewTypesNames: List<String> = emptyList()): FunSpec {
+                                             codeBlockBuilder: CodeBlock.Builder? = null): FunSpec {
 
 
         val createViewHolderFunctionBuilder = FunSpec.builder(Methods.ON_CREATE_VIEW_HOLDER)
@@ -266,60 +234,41 @@ class RecyclerAdapterGenerator(private val rClass: ClassName) {
                 .addParameter("viewType", INT)
                 .addModifiers(KModifier.OVERRIDE)
 
+
         return if (viewType != null) {
-            createViewHolderFunctionBuilder
-                    .returns(viewType.viewHolderType)
-                    .addStatement("return %T(inflate(%T.layout.%L, parent))",
-                            viewType.viewHolderType, rClass, viewType.layoutName)
-                    .build()
-        } else {
-            if (codeBlockBuilder == null) {
-                throw IllegalArgumentException("At least one parameter must be not null")
+            with(createViewHolderFunctionBuilder) {
+                returns(viewType.viewHolderType)
+                addStatement("return %T(inflate(%T.layout.%L, parent))",
+                        viewType.viewHolderType, rClass, viewType.layoutName)
+                build()
             }
-            createViewHolderFunctionBuilder
-                    .returns(Parameters.VIEW_HOLDER_SUPER_CLASS)
-                    .addStatement("val viewHolderType = %T.valueOf(viewType)",
-                            Parameters.VIEW_HOLDER_TYPE_ENUM_CLASS)
-                    .addStatement("")
-                    .beginControlFlow("return when (viewHolderType)")
-                    .addCode(codeBlockBuilder
-                            .build())
-                    .endControlFlow()
-                    .build()
+        } else {
+            with(createViewHolderFunctionBuilder) {
+                if (codeBlockBuilder == null) {
+                    throw IllegalArgumentException("At least one parameter must be not null")
+                }
+
+
+                addStatement("val viewHolderType = %T.valueOf(viewType)",
+                        Parameters.VIEW_HOLDER_TYPE_ENUM_CLASS)
+                addStatement("")
+                beginControlFlow("return when (viewHolderType)")
+                addCode("")
+                addCode(codeBlockBuilder.build())
+                endControlFlow()
+                returns(Parameters.VIEW_HOLDER_SUPER_CLASS)
+                build()
+            }
 
         }
     }
 
     private fun generateBindViewHolderFunc(viewType: ViewType? = null,
-                                           clickable: Boolean = false,
-                                           longClickable: Boolean = false,
                                            codeBlockBuilder: CodeBlock.Builder? = null): FunSpec {
 
-        var elementDeceleration = "elements[position]"
+        val elementDeceleration = "elements[position]"
         val bindViewHolderFunctionBuilder = FunSpec.builder(Methods.ON_BIND_VIEW_HOLDER)
                 .addModifiers(KModifier.OVERRIDE)
-
-        if (clickable || longClickable || viewType == null) {
-            bindViewHolderFunctionBuilder
-                    .addStatement("val %L = $elementDeceleration", Names.ELEMENT)
-                    .addStatement("")
-            elementDeceleration = Names.ELEMENT
-        }
-
-        if (clickable) {
-            bindViewHolderFunctionBuilder
-                    .addStatement("holder.onClicked { %L.onItemClicked(%L, position) }",
-                            Names.ON_CLICK_LISTENER, Names.ELEMENT)
-                    .addStatement("")
-        }
-
-        if (longClickable) {
-            bindViewHolderFunctionBuilder
-                    .addStatement("holder.onLongClicked { %L.onItemLongClicked(%L, position) }",
-                            Names.ON_LONG_CLICK_LISTENER, Names.ELEMENT)
-                    .addStatement("")
-        }
-
 
         return if (viewType != null) {
             bindViewHolderFunctionBuilder
@@ -368,8 +317,9 @@ class RecyclerAdapterGenerator(private val rClass: ClassName) {
             }
             recycleViewHolderFuncBuilder
                     .addParameter("holder", Parameters.VIEW_HOLDER_SUPER_CLASS)
-                    .addStatement("holder.recycle()")
                     .addStatement("val position = holder.adapterPosition")
+                    .addStatement("")
+                    .addStatement("holder.recycle()")
                     .addStatement("")
                     .beginControlFlow("when (holder)")
                     .addCode(codeBlockBuilder.build())
@@ -476,70 +426,66 @@ class RecyclerAdapterGenerator(private val rClass: ClassName) {
 
 
         if (viewType.actions.isEmpty()) {
-            return addStatement("%T.%L ->", Parameters.VIEW_HOLDER_TYPE_ENUM_CLASS, viewHolderEnumName)
-                    .indent()
-                    .addStatement("%T(inflate(viewHolderType.layout, parent))", viewType.viewHolderType)
-                    .unindent()
-                    .addStatement("")
+
+            addStatement("%T.%L ->", Parameters.VIEW_HOLDER_TYPE_ENUM_CLASS, viewHolderEnumName)
+
+            indent()
+
+            addStatement("%T(inflate(viewHolderType.layout, parent))", viewType.viewHolderType)
+
+            unindent()
+            addStatement("")
+
+            return this
         }
 
-        val caseCodeBuilder =
-                addStatement("%T.%L -> {", Parameters.VIEW_HOLDER_TYPE_ENUM_CLASS, viewHolderEnumName)
-                        .indent()
-                        .addStatement("val holder = %T(inflate(viewHolderType.layout, parent))", viewType.viewHolderType)
-                        .addStatement("val position = holder.adapterPosition")
-                        .addStatement("val element = elements[position] as %T", viewType.dataContainerType)
-                        .addStatement("")
+        addStatement("%T.%L -> {", Parameters.VIEW_HOLDER_TYPE_ENUM_CLASS, viewHolderEnumName)
+
+        indent()
+        addStatement("")
+
+        addStatement("val holder = %T(inflate(viewHolderType.layout, parent))", viewType.viewHolderType)
+
+        val actions = viewType.actions
+
+        val hasTouchAction = Actions.TOUCH in actions
+        if (!hasTouchAction ||
+                !(actions.size == 1 || (actions.size == 2 && Actions.FILTER in actions))) {
+            addStatement("val %L = holder.adapterPosition", Names.POSITION)
+            addStatement("val %L = %L[%L] as %T",
+                    Names.ELEMENT, Names.ELEMENTS, Names.POSITION, viewType.dataContainerType)
+        }
+
+        addStatement("")
+
         for (action in viewType.actions) {
             when (action) {
 
-                Actions.CLICK -> {
-                    caseCodeBuilder
-                            .addStatement("holder.onClicked {")
-                            .indent()
-                            .addStatement("%L.on%LClicked(%L, %L)",
-                                    Names.ACTION_LISTENER,
-                                    viewType.viewHolderType.simpleName,
-                                    Names.POSITION,
-                                    Names.ELEMENT)
-                            .unindent()
-                            .addStatement("}")
-                            .addStatement("")
+                Actions.CLICK ->
+                    createActionListenerValueAction("Clicked",
+                            viewType.viewHolderType.simpleName,
+                            "${Names.POSITION}, ${Names.ELEMENT}")
 
-                }
                 Actions.LONG_CLICK -> {
-                    caseCodeBuilder
-                            .addStatement("holder.onLongClicked {")
-                            .indent()
-                            .addStatement("%L.on%LLongClicked(%L, %L)",
-                                    Names.ACTION_LISTENER,
-                                    viewType.viewHolderType.simpleName,
-                                    Names.POSITION,
-                                    Names.ELEMENT)
-                            .unindent()
-                            .addStatement("}")
-                            .addStatement("")
+
+                    createActionListenerValueAction("LongClicked",
+                            viewType.viewHolderType.simpleName,
+                            "${Names.POSITION}, ${Names.ELEMENT}")
                 }
 
                 Actions.TOUCH -> {
-                    caseCodeBuilder
-                            .addStatement("holder.onTouch { view, event ->")
-                            .indent()
-                            .addStatement("%L.on%LTouched(view, event)",
-                                    Names.ACTION_LISTENER,
-                                    viewType.viewHolderType.simpleName)
-                            .unindent()
-                            .addStatement("}")
-                            .addStatement("")
+                    createActionListenerValueAction("Touched",
+                            viewType.viewHolderType.simpleName,
+                            "view, event",
+                            "view, event")
                 }
             }
         }
 
-        return caseCodeBuilder
-                .addStatement("holder")
-                .unindent()
-                .addStatement("}")
-                .addStatement("")
+        addStatement("holder")
+        appendClosingTags()
+
+        return this
     }
 
     private fun CodeBlock.Builder.insertBindViewHolderCase(viewType: ViewType,
@@ -547,10 +493,11 @@ class RecyclerAdapterGenerator(private val rClass: ClassName) {
 
         return addStatement("is %T ->", viewType.viewHolderType)
                 .indent()
-                .addStatement("%L%L(holder, %L as %T, position)",
+                .addStatement("%L%L(holder, %L[%L] as %T, position)",
                         Methods.ABSTRACT_BIND_CUSTOM,
                         viewHolderSimpleName,
-                        Names.ELEMENT,
+                        Names.ELEMENTS,
+                        Names.POSITION,
                         viewType.dataContainerType)
                 .unindent()
                 .addStatement("")
@@ -606,4 +553,29 @@ class RecyclerAdapterGenerator(private val rClass: ClassName) {
         return builder
     }
 
+    private fun CodeBlock.Builder.createActionListenerValueAction(action: String,
+                                                                  holderSimpleName: String,
+                                                                  params: String,
+                                                                  actionParamaters: String? = null) {
+        if (actionParamaters != null) {
+            addStatement("holder.on%L { %L ->", action, actionParamaters)
+        } else {
+            addStatement("holder.on%L {", action)
+        }
+
+        indent()
+        addStatement("%L.on%L%L(%L)", Names.ACTION_LISTENER, holderSimpleName, action, params)
+
+        appendClosingTags()
+    }
+
+    private fun CodeBlock.Builder.appendClosingTags(closingTagsCount: Int = 1) {
+        var count = 0
+        while (count < closingTagsCount) {
+            unindent()
+            addStatement("}")
+            addStatement("")
+            count++
+        }
+    }
 }

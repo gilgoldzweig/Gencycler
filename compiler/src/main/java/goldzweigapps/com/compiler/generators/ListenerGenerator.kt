@@ -9,15 +9,10 @@ import goldzweigapps.com.compiler.utils.simpleParameterName
 
 class ListenerGenerator {
 
-    fun generate(packageName: String, viewTypes: List<ViewType>) : FileSpec {
-        val listenerFileBuilder = FileSpec.builder(packageName, "ActionsListener")
-                .addAnnotation(AnnotationSpec.builder(JvmName::class)
-                        .useSiteTarget(AnnotationSpec.UseSiteTarget.FILE)
-                        .addMember("\"ActionsListener\"")
-                        .build())
+    fun generate(viewTypes: List<ViewType>) : TypeSpec {
 
         val listenerInterfaceBuilder = TypeSpec.interfaceBuilder("ActionsListener")
-                .addKdoc(KDocs.ADAPTER_CLASS)
+                .addKdoc(KDocs.ON_ACTION_LISTENER_CLASS)
 
 
 
@@ -61,6 +56,6 @@ class ListenerGenerator {
             }
         }
 
-        return listenerFileBuilder.addType(listenerInterfaceBuilder.build()).build()
+        return listenerInterfaceBuilder.build()
     }
 }

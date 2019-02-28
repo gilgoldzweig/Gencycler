@@ -5,6 +5,7 @@ import goldzweigapps.com.gencycler.R
 
 
 @GencyclerViewHolder(R.layout.kotlin_profile_type)
+@GencyclerActions([Actions.TOUCH])
 data class SimpleModel(val name: String,
 					   val description: String) : GencyclerModel
 

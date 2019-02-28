@@ -66,8 +66,6 @@ class GencyclerProcessor : AbstractProcessor() {
         val viewHolders = ArrayList<ViewHolder>()
         val viewTypes = HashMap<String, ViewType>()
 
-        val globalActions = HashSet<Actions>()
-
         roundEnvironment
                 .getElementsAnnotatedWith(GencyclerViewHolder::class.java)
                 .forEach {
@@ -108,7 +106,7 @@ class GencyclerProcessor : AbstractProcessor() {
                             getNamingAdapter(holder.namingCase),
                             XMLParser.parseViewFields(layoutFile))
 
-                    val actions = it.getAnnotation(GencyclerActions::class.java)?.value ?: emptyArray()
+                    val actions = it.getAnnotation(GencyclerActions::class.java)?.value?.toSet() ?: emptySet()
 
                     viewHolders.add(viewHolder)
 
@@ -158,19 +156,17 @@ class GencyclerProcessor : AbstractProcessor() {
 
                     val generatedAdapter = Adapter(adapterName,
                             packageName,
-                            adapterViewTypes, actions)
+                            adapterViewTypes,
+                            actions,
+
+                            if (actionsFoundInTypes || actionAnnotation != null)
+                                listenerGenerator.generate(adapterViewTypes)
+                            else null)
 
                     val adapterFile = EnvironmentUtil.generateOutputFile(generatedAdapter.name)
 
                     recyclerAdapterGenerator.generate(generatedAdapter)
                             .writeTo(adapterFile)
-
-                    Logger.w(adapterViewTypes)
-                    if (actionsFoundInTypes || actionAnnotation != null) {
-                        listenerGenerator.generate(packageName, adapterViewTypes)
-                                .writeTo(adapterFile)
-                    }
-
                 }
 
         return false

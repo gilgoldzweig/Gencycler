@@ -10,5 +10,5 @@ import goldzweigapps.com.annotations.annotations.Actions
 data class ViewType(val layoutName: String = "",
                     val dataContainerType: TypeName,
                     val viewHolderType: ClassName,
-                    var actions: Array<Actions> = emptyArray())
+                    var actions: Set<Actions> = emptySet())
 

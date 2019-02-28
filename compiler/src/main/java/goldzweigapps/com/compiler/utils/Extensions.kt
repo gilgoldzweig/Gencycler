@@ -6,40 +6,24 @@ import com.squareup.kotlinpoet.ParameterizedTypeName
 import com.squareup.kotlinpoet.TypeName
 
 val ClassName.simpleEnumName: String
-	get() = CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, simpleName)
+    get() = CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, simpleName)
 
 val ClassName.simpleParameterName: String
-	get() = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, simpleName)
-
-val ParameterizedTypeName.simpleEnumName: String
-	get() = this.rawType.simpleEnumName
+    get() = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, simpleName)
 
 val ParameterizedTypeName.simpleParameterName: String
-	get() = this.rawType.simpleEnumName
+    get() = rawType.simpleParameterName
 
 
 val TypeName.simpleParameterName: String
-	get() = when (this) {
-		is ClassName ->
-			simpleParameterName
+    get() = when (this) {
+        is ClassName ->
+            simpleParameterName
 
-		is ParameterizedTypeName ->
-			simpleParameterName
+        is ParameterizedTypeName ->
+            simpleParameterName
 
-		else ->
-			throw IllegalArgumentException("Unexpected type was found")
+        else ->
+            throw IllegalArgumentException("Unexpected type was found")
 
-	}
-
-val TypeName.simpleEnumName
-	get() = when (this) {
-		is ClassName ->
-			simpleEnumName
-
-		is ParameterizedTypeName ->
-			simpleEnumName
-
-		else ->
-			throw IllegalArgumentException("Unexpected type was found")
-
-	}
+    }
