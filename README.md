@@ -43,8 +43,8 @@ leaves you with only the bare minimum needed to write your business logic.
          maven { url "https://jitpack.io" }
       }
       dependencies {
-            implementation 'com.github.gilgoldzweig.Gencycler:gencycler:latest_version'
-            kapt 'com.github.gilgoldzweig.Gencycler:compiler:latest_version'
+            implementation "com.github.gilgoldzweig.Gencycler:gencycler:latest_version"
+            kapt "com.github.gilgoldzweig.Gencycler:compiler:latest_version"
       }
 #### Java
     apply plugin: 'kotlin-android'
@@ -55,8 +55,8 @@ leaves you with only the bare minimum needed to write your business logic.
 
     dependencies {
          implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$latest_kotlin_version"
-         implementation 'com.github.gilgoldzweig.Gencycler:gencycler:latest_version'
-         annotationProcessor 'com.github.gilgoldzweig.Gencycler:compiler:latest_version'
+         implementation "com.github.gilgoldzweig.Gencycler:gencycler:latest_version"
+         annotationProcessor "com.github.gilgoldzweig.Gencycler:compiler:latest_version"
     }
 ## How to use 
 
