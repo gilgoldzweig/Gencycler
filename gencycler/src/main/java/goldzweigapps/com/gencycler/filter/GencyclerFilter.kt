@@ -9,14 +9,15 @@ open class GencyclerFilter<T : GencyclerModel>(
         var doOnResults: (List<T>) -> Unit
 ) : Filter() {
 
+    private val sourceCopy = ArrayList(elements)
     private val filterResults = FilterResults()
 
     override fun performFiltering(constraint: CharSequence?): FilterResults {
         var filteredElements: MutableList<T> = ArrayList()
         if (constraint.isNullOrEmpty()) {
-            filteredElements = ArrayList(elements)
+            filteredElements = ArrayList(sourceCopy)
         } else {
-            elements.filterTo(filteredElements) { filter(constraint, it) }
+            sourceCopy.filterTo(filteredElements) { filter(constraint, it) }
         }
 
         filterResults.values = filteredElements
