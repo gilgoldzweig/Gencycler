@@ -4,16 +4,15 @@ import android.widget.Filter
 import goldzweigapps.com.annotations.annotations.GencyclerModel
 
 open class GencyclerFilter<T : GencyclerModel>(
-    var elements: List<T> = emptyList(),
-    var filter: (CharSequence, T) -> Boolean,
-    var doOnResults: (List<T>) -> Unit
+        var elements: List<T> = emptyList(),
+        var filter: (CharSequence, T) -> Boolean,
+        var doOnResults: (List<T>) -> Unit
 ) : Filter() {
 
     private val filterResults = FilterResults()
-    private var filteredElements: MutableList<T> = ArrayList(elements)
 
     override fun performFiltering(constraint: CharSequence?): FilterResults {
-
+        var filteredElements: MutableList<T> = ArrayList()
         if (constraint.isNullOrEmpty()) {
             filteredElements = ArrayList(elements)
         } else {
