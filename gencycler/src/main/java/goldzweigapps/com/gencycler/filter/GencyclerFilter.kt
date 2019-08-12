@@ -26,7 +26,6 @@ open class GencyclerFilter<T : GencyclerModel>(
         return filterResults
     }
 
-
     override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
         if (results == null) return
         doOnResults.invoke(results.values as List<T>)

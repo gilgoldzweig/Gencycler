@@ -1,4 +1,4 @@
-package goldzweigapps.com.gencycler
+package goldzweigapps.com.sample
 
 import org.junit.Test
 

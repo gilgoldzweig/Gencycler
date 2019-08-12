@@ -1,7 +1,6 @@
 package goldzweigapps.com.gencycler.extensions
 
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.helper.ItemTouchHelper
+import androidx.recyclerview.widget.ItemTouchHelper
 import goldzweigapps.com.annotations.annotations.GencyclerModel
 import goldzweigapps.com.gencycler.GencyclerHolder
 import goldzweigapps.com.gencycler.GencyclerRecyclerAdapter
@@ -44,23 +43,23 @@ class SimpleGesturesHelper<in T: GencyclerRecyclerAdapter<out GencyclerModel, ou
 		longPressDragEnabled = longPressOnly
 	}
 
-	fun attachToRecyclerView(recyclerView: RecyclerView) {
+	fun attachToRecyclerView(recyclerView: androidx.recyclerview.widget.RecyclerView) {
 		itemTouchHelper.attachToRecyclerView(recyclerView)
 	}
 
-	override fun onMove(recyclerView: RecyclerView,
-						oldHolder: RecyclerView.ViewHolder,
-						newHolder: RecyclerView.ViewHolder): Boolean {
+	override fun onMove(recyclerView: androidx.recyclerview.widget.RecyclerView,
+						oldHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder,
+						newHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder): Boolean {
 
 		return dragEnabled &&
 				adapter.swap(oldHolder.adapterPosition, newHolder.adapterPosition)
 	}
 
-	override fun getMovementFlags(recyclerView: RecyclerView,
-								  holder: RecyclerView.ViewHolder): Int =
+	override fun getMovementFlags(recyclerView: androidx.recyclerview.widget.RecyclerView,
+								  holder: androidx.recyclerview.widget.RecyclerView.ViewHolder): Int =
 			makeMovementFlags(dragFlags, direction)
 
-	override fun onSwiped(holder: RecyclerView.ViewHolder, direction: Int) {
+	override fun onSwiped(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, direction: Int) {
 		if (swipeEnabled) adapter.remove(holder.adapterPosition)
 	}
 

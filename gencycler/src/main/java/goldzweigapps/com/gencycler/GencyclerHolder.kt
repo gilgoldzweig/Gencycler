@@ -1,7 +1,6 @@
 package goldzweigapps.com.gencycler
 
-import android.support.annotation.IdRes
-import android.support.v7.widget.RecyclerView
+import androidx.annotation.IdRes
 import android.view.View
 
 /**
@@ -9,7 +8,7 @@ import android.view.View
  *
  * @param view The inflated view provided in the generation process
  */
-open class GencyclerHolder(view: View) : RecyclerView.ViewHolder(view) {
+open class GencyclerHolder(view: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
 
  
     protected fun <T : View> findView(@IdRes id: Int): T = itemView.findViewById(id)

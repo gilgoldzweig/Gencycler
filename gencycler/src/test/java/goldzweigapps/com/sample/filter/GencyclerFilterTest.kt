@@ -1,10 +1,10 @@
-package goldzweigapps.com.gencycler.filter
+package goldzweigapps.com.sample.filter
 
 import android.widget.Filter
+import goldzweigapps.com.gencycler.filter.GencyclerFilter
 import org.junit.After
 import org.junit.Before
 
-import org.junit.Assert.*
 import org.junit.Test
 
 class GencyclerFilterTest {

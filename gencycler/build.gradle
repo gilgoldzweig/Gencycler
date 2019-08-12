@@ -10,19 +10,13 @@ android {
     defaultConfig {
         minSdkVersion 14
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         javaCompileOptions {
             annotationProcessorOptions {
                 includeCompileClasspath = true
             }
         }
-    }
-
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     libraryVariants.all {
@@ -34,7 +28,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     api project(":annotations")
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "com.android.support:recyclerview-v7:$suppprt"
+    implementation "androidx.recyclerview:recyclerview:$recyclerview"
     testImplementation 'junit:junit:4.12'
 
 

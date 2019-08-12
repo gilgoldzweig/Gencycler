@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:background="#ffffff"
+        android:paddingTop="20dp"
+        android:elevation="1dp"
+        android:paddingBottom="20dp">
+
+    <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/item_mobile_payment_restaurant_logo"
+            android:layout_width="77dp"
+            android:layout_height="77dp"
+            android:layout_marginStart="18dp"
+            android:transitionName="res_logo"
+            android:background="@drawable/circle_shadow"
+            android:elevation="3dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/item_mobile_payment_restaurant_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:ellipsize="end"
+            android:textAlignment="viewStart"
+            android:text="Java Coffee"
+            app:layout_constraintStart_toEndOf="@id/item_mobile_payment_restaurant_logo"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/item_mobile_payment_restaurant_address"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:ellipsize="end"
+            android:textAlignment="viewStart"
+            android:text="Ben Yehuda 16"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/item_mobile_payment_restaurant_name"
+            app:layout_constraintTop_toBottomOf="@id/item_mobile_payment_restaurant_name" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/item_mobile_payment_restaurant_distance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Distance: 5m"
+            app:layout_constraintStart_toStartOf="@id/item_mobile_payment_restaurant_name"
+            app:layout_constraintTop_toBottomOf="@id/item_mobile_payment_restaurant_address" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

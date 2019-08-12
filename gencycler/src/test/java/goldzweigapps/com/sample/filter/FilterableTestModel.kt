@@ -1,4 +1,4 @@
-package goldzweigapps.com.gencycler.filter
+package goldzweigapps.com.sample.filter
 
 import goldzweigapps.com.annotations.annotations.GencyclerModel
 

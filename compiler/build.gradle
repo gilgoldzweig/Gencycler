@@ -9,5 +9,6 @@ dependencies {
     api project(':annotations')
     implementation "com.squareup:kotlinpoet:$kotlin_poet"
     implementation "com.google.guava:guava:$guava"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 }

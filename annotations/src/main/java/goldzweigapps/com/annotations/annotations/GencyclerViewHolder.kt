@@ -1,6 +1,6 @@
 package goldzweigapps.com.annotations.annotations
 
-import android.support.annotation.LayoutRes
+import androidx.annotation.LayoutRes
 
 /**
  * Requests the Gencycler code generator to generate a new ViewHolder for the annotated class

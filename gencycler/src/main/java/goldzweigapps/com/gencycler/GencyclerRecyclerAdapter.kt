@@ -3,13 +3,11 @@ package goldzweigapps.com.gencycler
 import android.content.Context
 import android.os.Build
 import android.os.Looper
-import android.support.annotation.LayoutRes
-import android.support.v7.widget.RecyclerView
+import androidx.annotation.LayoutRes
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Filter
-import android.widget.Filterable
 import goldzweigapps.com.annotations.annotations.GencyclerModel
 import java.util.*
 
@@ -179,7 +177,7 @@ abstract class GencyclerRecyclerAdapter<T : GencyclerModel, VH : GencyclerHolder
 	 *
 	 * @return true if the range was removed and false otherwise
 	 */
-	open fun remove(range: IntRange): Boolean = remove(range.start, range.last)
+	open fun remove(range: IntRange): Boolean = remove(range.first, range.last)
 
 	/**
 	 * Custom '-' operator

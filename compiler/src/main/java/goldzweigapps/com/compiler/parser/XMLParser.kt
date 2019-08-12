@@ -1,5 +1,7 @@
 package goldzweigapps.com.compiler.parser
 
+import goldzweigapps.com.compiler.consts.Packages
+import goldzweigapps.com.compiler.consts.Parameters
 import goldzweigapps.com.compiler.consts.widgets
 import goldzweigapps.com.compiler.models.ViewField
 import goldzweigapps.com.compiler.utils.Logger
@@ -84,10 +86,10 @@ object XMLParser {
                 nodeName
 
             nodeName in widgets -> //Node is part of android widgets we fill in the missing package name
-                "android.widget.$nodeName"
+                "${Packages.ANDROID_WIDGET}$nodeName"
 
             else -> //Node has unknown package we just say it's a View
-                "android.view.View"
+                Parameters.VIEW_CLASS_NAME.canonicalName
 
         }
     }
