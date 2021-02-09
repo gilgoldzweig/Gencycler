@@ -1,5 +1,6 @@
-package com.gillongname.annotations
+package com.gillongname.annotations.adapter
 
+import com.gillongname.annotations.GencyclerModel
 import kotlin.reflect.KClass
 
 @Retention(AnnotationRetention.SOURCE)

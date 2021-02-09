@@ -11,11 +11,10 @@ class GencyclerProcessor : SymbolProcessor {
         codeGenerator: CodeGenerator,
         logger: KSPLogger
     ) {
-
     }
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-
+        resolver.getAllFiles().map { it }
     }
 
     override fun finish() {
