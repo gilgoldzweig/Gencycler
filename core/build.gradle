@@ -27,5 +27,5 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "androidx.annotation:annotation:1.1.0"
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
-    implementation project(':annotations')
+    api project(':annotations')
 }

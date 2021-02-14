@@ -1,7 +1,6 @@
-import com.android.sdklib.AndroidVersion.VersionCodes
 plugins {
+    id("com.google.devtools.ksp") version "1.4.30-1.0.0-alpha02"
     id("com.android.application")
-    id("kotlin-ksp") version "1.4.0-rc-dev-experimental-20200828"
     kotlin("android")
 }
 
@@ -35,5 +34,8 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+
+    implementation(project(":core"))
+//    implementation(project(":processor"))
     ksp(project(":processor"))
 }

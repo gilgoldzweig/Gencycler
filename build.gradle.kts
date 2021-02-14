@@ -1,16 +1,22 @@
 plugins {
-    kotlin("jvm") version "1.4.20"
+    kotlin("jvm") version "1.4.30" apply false
 }
 
 buildscript {
-    val kotlin_version by extra("1.4.21")
+    repositories {
+        google()
+        jcenter()
+    }
+    val kotlin_version by extra("1.4.30")
     dependencies {
-        classpath(kotlin("gradle-plugin", version = kotlin_version))
         classpath("com.android.tools.build:gradle:4.0.2")
+        classpath(kotlin("gradle-plugin", version = kotlin_version))
     }
 }
 
-repositories {
-    mavenCentral()
-    google()
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
 }
