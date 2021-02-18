@@ -23,7 +23,7 @@ class GencyclerProcessor : SymbolProcessor {
         log = codeGenerator.createNewFile(Dependencies(false), "", "GencyclerProcessor", "log")
     }
 
-    override fun process(resolver: Resolver) {
+    override fun process(resolver: Resolver): List<KSAnnotated> {
         resolver.getAllFiles().forEach {
             log.appendText(it.fileName)
         }
@@ -34,6 +34,8 @@ class GencyclerProcessor : SymbolProcessor {
         resolver.getSymbolsWithAnnotation(ViewHolder::class.qualifiedName!!).forEach {
             log.appendText(it.toString())
         }
+
+        return emptyList()
     }
 
     override fun finish() {
