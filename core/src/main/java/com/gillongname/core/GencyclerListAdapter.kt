@@ -5,9 +5,8 @@ import com.gillongname.annotations.GencyclerModel
 import java.util.*
 import kotlin.collections.ArrayList
 
-
 abstract class GencyclerListAdapter<E : GencyclerModel, VH : RecyclerView.ViewHolder>(
-    val elements: MutableList<E> = ArrayList()
+    private val elements: MutableList<E> = ArrayList()
 ) : RecyclerView.Adapter<VH>(), MutableListOperators<E>, MutableList<E> by elements {
 
     override val size: Int
@@ -146,7 +145,6 @@ abstract class GencyclerListAdapter<E : GencyclerModel, VH : RecyclerView.ViewHo
     /**
      * overrides the getItemCount which is constant that way we don't have to generate it
      * It can be overridden if the user want's to
-     *
      */
     override fun getItemCount(): Int = size
 
