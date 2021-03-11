@@ -15,12 +15,12 @@ import kotlin.test.assertEquals
 class GencyclerListAdapterTest {
 
     var elements = ArrayList<TestGencyclerModel>()
-    lateinit var adapter: GencyclerListAdapter<TestGencyclerModel, TestViewHolder>
+    lateinit var adapter: SampleAdapter
 
     @Before
     fun before() {
         elements = ArrayList()
-        adapter = spyk(TestAdapter(elements), recordPrivateCalls = true)
+        adapter = TestAdapter(elements)
     }
 
     @Test
@@ -54,15 +54,9 @@ class GencyclerListAdapterTest {
 
     @Test
     fun checkAddingElementsNotifies() {
+        val stub = spyk(adapter, recordPrivateCalls = true)
         val model = TestGencyclerModel()
-        justRun { adapter.notifyItemInserted(0) }
-        adapter.add(model)
-
-
-        verify(exactly = 1) {
-            adapter.notifyItemInserted(0)
-        }
-
+        stub.verifyNotificationAction({ add(model) }, { notifyItemInserted(0) })
 
         val rangeTest = listOf(
             TestGencyclerModel(),
@@ -72,12 +66,34 @@ class GencyclerListAdapterTest {
             TestGencyclerModel()
         )
 
-        justRun { adapter.notifyItemRangeInserted(1, rangeTest.size) }
-        adapter.addAll(rangeTest)
-
-        verify(exactly = 1) {
-            adapter.notifyItemRangeInserted(1, rangeTest.size)
-        }
+        stub.verifyNotificationAction(
+            { addAll(rangeTest) },
+            { notifyItemRangeInserted(1, rangeTest.size) })
     }
 
+
+    @Test
+    fun testRemovingElements() {
+        val singleModel = TestGencyclerModel(0)
+        val stub = spyk(adapter, recordPrivateCalls = true)
+        stub.add(element = singleModel, notifyChanges = false)
+        stub.remove(singleModel)
+//        assert(adapter.isEmpty())
+//        stub.verifyNotificationAction({ remove(singleModel) }, { notifyItemRemoved(0) })
+    }
+
+    @After
+    fun clean() {
+        clearAllMocks()
+    }
+
+    fun SampleAdapter.verifyNotificationAction(
+        action: SampleAdapter.() -> Unit,
+        notifyAction: SampleAdapter.() -> Unit
+    ) {
+        justRun { notifyAction() }
+        action()
+        verify { notifyAction() }
+    }
 }
+typealias SampleAdapter = GencyclerListAdapter<TestGencyclerModel, TestViewHolder>

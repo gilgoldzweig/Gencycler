@@ -17,8 +17,6 @@ class TestAdapter(elements: ArrayList<TestGencyclerModel>) :
         TestViewHolder(parent)
 
     override fun onBindViewHolder(holder: TestViewHolder, position: Int) = Unit
-
-    override fun getItemCount(): Int = 100
 }
 
 

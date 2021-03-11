@@ -54,14 +54,11 @@ abstract class GencyclerListAdapter<E, VH : RecyclerView.ViewHolder>(
 
 
     override fun remove(element: E): Boolean =
-        remove(element, true)
+        remove(element = element, notifyChanges = true)
 
     fun remove(element: E, notifyChanges: Boolean): Boolean {
         val index = elements.indexOf(element)
-        val result = elements.remove(element)
-
-        if (result && notifyChanges) notifyItemRemoved(index)
-        return result
+        return removeAt(index, notifyChanges) != null
     }
 
     override fun removeAt(index: Int): E =
@@ -205,64 +202,4 @@ abstract class GencyclerListAdapter<E, VH : RecyclerView.ViewHolder>(
      */
     private fun Any?.ignore(): Unit = Unit
 
-//    /**
-////     * Because I can't mock the original notifyDataSetChanged calls I use internal once just for unit testing.
-////     * You should use [RecyclerView.Adapter.notifyDataSetChanged]
-////     */
-////    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-////    internal fun internalNotifyDataSetChanged() = notifyDataSetChanged()
-////
-////    /**
-////     * Because I can't mock the original notifyItemChanged calls I use internal once just for unit testing.
-////     * You should use [RecyclerView.Adapter.notifyItemChanged]
-////     */
-////    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-////    internal fun internalNotifyItemChanged(position: Int) = notifyItemChanged(position)
-////
-////    /**
-////     * Because I can't mock the original notifyItemInserted calls I use internal once just for unit testing.
-////     * You should use [RecyclerView.Adapter.notifyItemInserted]
-////     */
-////    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-////    internal fun internalNotifyItemInserted(position: Int) = notifyItemInserted(position)
-////
-////    /**
-////     * Because I can't mock the original notifyItemRemoved calls I use internal once just for unit testing.
-////     * You should use [RecyclerView.Adapter.notifyItemRemoved]
-////     */
-////    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-////    internal fun internalNotifyItemRemoved(position: Int) = notifyItemRemoved(position)
-////
-////    /**
-////     * Because I can't mock the original notifyItemRangeChanged calls I use internal once just for unit testing.
-////     * You should use [RecyclerView.Adapter.notifyItemRangeChanged]
-////     */
-////    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-////    internal fun internalNotifyItemRangeChanged(positionStart: Int, count: Int) =
-////        notifyItemRangeChanged(positionStart, count)
-////
-////    /**
-////     * Because I can't mock the original notifyItemRangeInserted calls I use internal once just for unit testing.
-////     * You should use [RecyclerView.Adapter.notifyItemRangeInserted]
-////     */
-////    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-////    internal fun internalNotifyItemRangeInserted(positionStart: Int, count: Int) =
-////        notifyItemRangeInserted(positionStart, count)
-////
-////    /**
-////     * Because I can't mock the original notifyItemRangeRemoved calls I use internal once just for unit testing.
-////     * You should use [RecyclerView.Adapter.notifyItemRangeRemoved]
-////     */
-////    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-////    internal fun internalNotifyItemRangeRemoved(positionStart: Int, count: Int) =
-////        notifyItemRangeRemoved(positionStart, count)
-////
-////    /**
-////     * Because I can't mock the original notifyItemMoved calls I use internal once just for unit testing.
-////     * You should use [RecyclerView.Adapter.notifyItemMoved]
-////     */
-////    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-////    internal fun internalNotifyItemMoved(fromPosition: Int, toPosition: Int) =
-////        notifyItemMoved(fromPosition, toPosition)
-////
 }
