@@ -1,7 +1,8 @@
 plugins {
     kotlin("jvm") version "1.4.30" apply false
-    id("com.android.application") version "4.2.0-beta02" apply false
+    id("com.android.application") version "7.0.0-alpha07" apply false
     id("com.google.devtools.ksp") version "1.4.30-1.0.0-alpha02" apply false
+    id("io.gitlab.arturbosch.detekt").version("1.16.0")
 }
 
 buildscript {
@@ -19,5 +20,25 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        jcenter()
+    }
+//    if (has) {
+//
+//    }
+}
+repositories {
+    jcenter()
+}
+
+detekt {
+    toolVersion = "1.16.0"
+    config = files("config/detekt/detekt.yml")
+
+    reports {
+        html {
+            enabled = true
+            destination = file("reports/detekt/detekt.html")
+        }
     }
 }
+
