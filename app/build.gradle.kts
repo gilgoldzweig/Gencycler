@@ -35,6 +35,9 @@ dependencies {
 
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
 
+    implementation ("androidx.annotation:annotation:1.1.0")
+    implementation ("androidx.recyclerview:recyclerview:1.1.0")
+
     implementation(project(":core"))
 //    implementation(project(":processor"))
     ksp(project(":processor"))
