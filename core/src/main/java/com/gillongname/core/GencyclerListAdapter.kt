@@ -1,40 +1,53 @@
 package com.gillongname.core
 
+import androidx.annotation.VisibleForTesting
 import androidx.recyclerview.widget.RecyclerView
 import com.gillongname.annotations.GencyclerModel
 import java.util.*
 import kotlin.collections.ArrayList
 
-abstract class GencyclerListAdapter<E : GencyclerModel, VH : RecyclerView.ViewHolder>(
+abstract class GencyclerListAdapter<E, VH : RecyclerView.ViewHolder>(
     private val elements: MutableList<E> = ArrayList()
 ) : RecyclerView.Adapter<VH>(), MutableListOperators<E>, MutableList<E> by elements {
 
     override val size: Int
         get() = elements.size
 
-    override fun add(element: E): Boolean {
-        val result = elements.add(element)
-        if (result) {
-            notifyItemInserted(size)
+    /**
+     * overrides the getItemCount which is constant that way we don't have to generate it
+     * It can be overridden if the user want's to
+     */
+    override fun getItemCount(): Int = size
+
+    override fun add(element: E): Boolean =
+        add(element = element, notifyChanges = true)
+
+    override fun add(index: Int, element: E) =
+        add(index, element, true).ignore()
+
+    fun add(index: Int = size, element: E, notifyChanges: Boolean): Boolean {
+        elements.add(index, element)
+        if (notifyChanges) {
+            notifyItemInserted(index)
         }
-        return result
+        return true
     }
 
-    override fun add(index: Int, element: E) {
-        elements.add(index, element)
-        notifyItemInserted(index)
-    }
 
     override fun addAll(elements: Collection<E>): Boolean =
         addAll(size, elements)
 
-    override fun addAll(index: Int, elements: Collection<E>): Boolean {
+    override fun addAll(index: Int, elements: Collection<E>): Boolean =
+        addAll(index, elements, true)
+
+    fun addAll(index: Int = size, elements: Collection<E>, notifyChanges: Boolean): Boolean {
         val result = this.elements.addAll(index, elements)
-        if (result) {
+        if (result && notifyChanges) {
             notifyItemRangeInserted(index, elements.size)
         }
         return result
     }
+
 
     override fun plus(element: E): Boolean =
         add(element)
@@ -43,47 +56,55 @@ abstract class GencyclerListAdapter<E : GencyclerModel, VH : RecyclerView.ViewHo
         addAll(elements)
 
 
-    override fun remove(element: E): Boolean {
+    override fun remove(element: E): Boolean =
+        remove(element, true)
+
+    fun remove(element: E, notifyChanges: Boolean): Boolean {
         val index = elements.indexOf(element)
         val result = elements.remove(element)
 
-        if (result) notifyItemRemoved(index)
+        if (result && notifyChanges) notifyItemRemoved(index)
         return result
     }
 
+    override fun removeAt(index: Int): E =
+        removeAt(index, true)
 
-    override fun removeAt(index: Int): E {
+    fun removeAt(index: Int, notifyChanges: Boolean): E {
         if (index !in 0 until size)
             throw IndexOutOfBoundsException("Failed removing element at $index, size is $size")
 
         val result = elements.removeAt(index)
-        notifyItemRemoved(index)
+        if (notifyChanges) {
+            notifyItemRemoved(index)
+        }
         return result
     }
 
-    override fun removeAll(elements: Collection<E>): Boolean {
+    override fun removeAll(elements: Collection<E>): Boolean =
+        removeAll(elements, true)
+
+    open fun removeRange(range: IntRange): Boolean {
+        var result = false
+        if (range in 0 until size) {
+            val subList = subList(range.first, range.last)
+            result = removeAll(subList, true)
+        }
+        return result
+    }
+
+    fun removeAll(elements: Collection<E>, notifyChanges: Boolean): Boolean {
         if (elements.isEmpty()) return false
 
         val startIndex = this.elements.indexOf(elements.first())
 
         val result = this.elements.removeAll(elements)
 
-        if (result) notifyItemRangeRemoved(startIndex, elements.size)
+        if (result && notifyChanges) notifyItemRangeRemoved(startIndex, elements.size)
 
         return result
     }
 
-    open fun removeRange(range: IntRange): Boolean {
-        var result = false
-        if (range in 0 until size) {
-            val subList = subList(range.first, range.last)
-            result = removeAll(subList)
-            if (result) {
-                notifyItemRangeRemoved(range.first, subList.size)
-            }
-        }
-        return result
-    }
 
     override fun minus(element: E): Boolean =
         remove(element)
@@ -98,26 +119,34 @@ abstract class GencyclerListAdapter<E : GencyclerModel, VH : RecyclerView.ViewHo
         removeRange(range)
 
 
-    override operator fun set(index: Int, element: E): E {
+    override operator fun set(index: Int, element: E): E =
+        set(index, element, true)
+
+    fun set(index: Int, element: E, notifyChanges: Boolean): E {
         if (index !in 0 until size)
             throw IndexOutOfBoundsException("Failed setting element at $index, size is $size")
 
         val lastElement = elements.set(index, element)
-        notifyItemChanged(index)
+        if (notifyChanges) {
+            notifyItemChanged(index)
+        }
         return lastElement
     }
 
-    open fun swap(from: Int, to: Int): Boolean {
-        if (from < 0 || from > size || to < 0 || to > size
-        ) return false
+    open fun swap(from: Int, to: Int, notifyChanges: Boolean = true): Boolean {
+        if (from < 0 || from > size || to < 0 || to > size) return false
 
         val temp = elements[from]
         elements[from] = elements[to]
         elements[to] = temp
 
-        notifyItemMoved(from, to)
+        if (notifyChanges) {
+            notifyItemMoved(from, to)
+        }
+
         return true
     }
+
 
     override operator fun get(index: Int): E = elements[index]
 
@@ -126,27 +155,28 @@ abstract class GencyclerListAdapter<E : GencyclerModel, VH : RecyclerView.ViewHo
     override operator fun get(range: IntRange): Collection<E> =
         elements.subList(range.first, range.last)
 
+
     override operator fun contains(element: E): Boolean =
         element in elements
 
-    open fun replace(collection: Collection<E>) {
+    open fun replace(collection: Collection<E>, notifyChanges: Boolean = true) {
         elements.replace(collection)
-        notifyDataSetChanged()
+        if (notifyChanges) {
+            notifyDataSetChanged()
+        }
     }
 
-    override fun clear() {
+    override fun clear() =
+        clear(true)
+
+    fun clear(notifyChanges: Boolean) {
         elements.clear()
-        notifyDataSetChanged()
+        if (notifyChanges) {
+            notifyDataSetChanged()
+        }
     }
 
     override fun isEmpty(): Boolean = elements.isEmpty()
-
-
-    /**
-     * overrides the getItemCount which is constant that way we don't have to generate it
-     * It can be overridden if the user want's to
-     */
-    override fun getItemCount(): Int = size
 
 
     private fun MutableCollection<E>.replace(collection: Collection<E>) {
@@ -170,4 +200,72 @@ abstract class GencyclerListAdapter<E : GencyclerModel, VH : RecyclerView.ViewHo
 
     private operator fun IntRange.contains(range: IntRange): Boolean =
         start in range && last in range
+
+    /**
+     * Used to ignore whatever value is provided in the
+     * @receiver
+     *
+     */
+    private fun Any?.ignore(): Unit = Unit
+
+//    /**
+////     * Because I can't mock the original notifyDataSetChanged calls I use internal once just for unit testing.
+////     * You should use [RecyclerView.Adapter.notifyDataSetChanged]
+////     */
+////    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+////    internal fun internalNotifyDataSetChanged() = notifyDataSetChanged()
+////
+////    /**
+////     * Because I can't mock the original notifyItemChanged calls I use internal once just for unit testing.
+////     * You should use [RecyclerView.Adapter.notifyItemChanged]
+////     */
+////    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+////    internal fun internalNotifyItemChanged(position: Int) = notifyItemChanged(position)
+////
+////    /**
+////     * Because I can't mock the original notifyItemInserted calls I use internal once just for unit testing.
+////     * You should use [RecyclerView.Adapter.notifyItemInserted]
+////     */
+////    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+////    internal fun internalNotifyItemInserted(position: Int) = notifyItemInserted(position)
+////
+////    /**
+////     * Because I can't mock the original notifyItemRemoved calls I use internal once just for unit testing.
+////     * You should use [RecyclerView.Adapter.notifyItemRemoved]
+////     */
+////    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+////    internal fun internalNotifyItemRemoved(position: Int) = notifyItemRemoved(position)
+////
+////    /**
+////     * Because I can't mock the original notifyItemRangeChanged calls I use internal once just for unit testing.
+////     * You should use [RecyclerView.Adapter.notifyItemRangeChanged]
+////     */
+////    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+////    internal fun internalNotifyItemRangeChanged(positionStart: Int, count: Int) =
+////        notifyItemRangeChanged(positionStart, count)
+////
+////    /**
+////     * Because I can't mock the original notifyItemRangeInserted calls I use internal once just for unit testing.
+////     * You should use [RecyclerView.Adapter.notifyItemRangeInserted]
+////     */
+////    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+////    internal fun internalNotifyItemRangeInserted(positionStart: Int, count: Int) =
+////        notifyItemRangeInserted(positionStart, count)
+////
+////    /**
+////     * Because I can't mock the original notifyItemRangeRemoved calls I use internal once just for unit testing.
+////     * You should use [RecyclerView.Adapter.notifyItemRangeRemoved]
+////     */
+////    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+////    internal fun internalNotifyItemRangeRemoved(positionStart: Int, count: Int) =
+////        notifyItemRangeRemoved(positionStart, count)
+////
+////    /**
+////     * Because I can't mock the original notifyItemMoved calls I use internal once just for unit testing.
+////     * You should use [RecyclerView.Adapter.notifyItemMoved]
+////     */
+////    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+////    internal fun internalNotifyItemMoved(fromPosition: Int, toPosition: Int) =
+////        notifyItemMoved(fromPosition, toPosition)
+////
 }
