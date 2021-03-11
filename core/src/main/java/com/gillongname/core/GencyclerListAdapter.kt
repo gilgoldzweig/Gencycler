@@ -1,9 +1,6 @@
 package com.gillongname.core
 
-import androidx.annotation.VisibleForTesting
 import androidx.recyclerview.widget.RecyclerView
-import com.gillongname.annotations.GencyclerModel
-import java.util.*
 import kotlin.collections.ArrayList
 
 abstract class GencyclerListAdapter<E, VH : RecyclerView.ViewHolder>(
