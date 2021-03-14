@@ -1,3 +1,3 @@
 package com.gillongname.annotations.adapter
 
-annotation class ViewType()
+annotation class ViewType

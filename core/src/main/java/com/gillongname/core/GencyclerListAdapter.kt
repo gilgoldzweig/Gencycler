@@ -108,8 +108,7 @@ abstract class GencyclerListAdapter<E : GencyclerModel, VH : RecyclerView.ViewHo
     }
 
     open fun swap(from: Int, to: Int): Boolean {
-        if (from < 0 || from > size || to < 0 || to > size
-        ) return false
+        if (from..to !in 0..size) return false
 
         val temp = elements[from]
         elements[from] = elements[to]
@@ -168,6 +167,6 @@ abstract class GencyclerListAdapter<E : GencyclerModel, VH : RecyclerView.ViewHo
         }
     }
 
-    private operator fun IntRange.contains(range: IntRange): Boolean =
+    internal operator fun IntRange.contains(range: IntRange): Boolean =
         start in range && last in range
 }
