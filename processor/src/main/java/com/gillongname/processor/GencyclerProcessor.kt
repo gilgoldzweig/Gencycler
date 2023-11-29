@@ -5,41 +5,29 @@ import com.gillongname.annotations.adapter.Adapter
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.KSAnnotated
 import java.io.OutputStream
-import kotlin.math.log
 
-class GencyclerProcessor : SymbolProcessor {
-    lateinit var logger: KSPLogger
-    lateinit var codeGenerator: CodeGenerator
-    lateinit var log: OutputStream
-
-    override fun init(
-        options: Map<String, String>,
-        kotlinVersion: KotlinVersion,
-        codeGenerator: CodeGenerator,
-        logger: KSPLogger
-    ) {
-        this.codeGenerator = codeGenerator
-        this.logger = logger
-        log = codeGenerator.createNewFile(Dependencies(false), "", "GencyclerProcessor", "log")
-    }
+class GencyclerProcessor(environment: SymbolProcessorEnvironment) : SymbolProcessor {
+    val logger = environment.logger
+    val generator = environment.codeGenerator
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        resolver.getAllFiles().forEach {
-            log.appendText(it.fileName)
-        }
         resolver.getSymbolsWithAnnotation(Adapter::class.qualifiedName!!).forEach {
-            log.appendText(it.toString())
+            logger.info("Creating an Adapter for: ", it)
         }
 
         resolver.getSymbolsWithAnnotation(ViewHolder::class.qualifiedName!!).forEach {
-            log.appendText(it.toString())
+            logger.info("Creating a ViewHolder for: ", it)
         }
 
         return emptyList()
     }
 
+    override fun onError() {
+        super.onError()
+
+    }
     override fun finish() {
-        log.close()
+        logger.info("Gencycler finished processing")
     }
 }
 

@@ -22,7 +22,7 @@ android:layout_height="wrap_content"/>
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FIELD)
 @Repeatable
-annotation class ViewHolder(val value: Int)
+annotation class ViewHolder
 
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FIELD)

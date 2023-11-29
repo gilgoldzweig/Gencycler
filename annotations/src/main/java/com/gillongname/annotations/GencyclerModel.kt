@@ -1,3 +1,5 @@
 package com.gillongname.annotations
 
-interface GencyclerModel
+interface GencyclerModel {
+    val layoutResId: Int
+}

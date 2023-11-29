@@ -1,44 +1,22 @@
 plugins {
-    id("com.android.application")
-    kotlin("android")
-    id("com.google.devtools.ksp")
+    id("gencycler.android.application")
+    alias(libs.plugins.ksp)
 }
 
 android {
-    buildToolsVersion = "30.0.3"
-    compileSdkVersion(30)
-
-    defaultConfig {
-        applicationId = Config.groupId
-        versionCode = Config.versionCode
-        versionName = Config.versionName
-        minSdkVersion(Config.minSdk)
-        targetSdkVersion(Config.targetSdk)
-    }
-
-}
-
-repositories {
-    mavenCentral()
-    google()
+    namespace = "com.gillongname.gencycler"
 }
 
 dependencies {
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:2.0.0-Beta1"))
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.core.ktx)
 
-    implementation("androidx.core:core-ktx:1.3.2")
-    implementation("androidx.appcompat:appcompat:1.2.0")
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
-
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
-
-    implementation ("androidx.annotation:annotation:1.1.0")
-    implementation ("androidx.recyclerview:recyclerview:1.1.0")
+    implementation (libs.androidx.annotation)
+    implementation (libs.androidx.recyclerview)
 
     implementation(project(":core"))
-//    implementation(project(":processor"))
     ksp(project(":processor"))
 }

@@ -1,4 +1,4 @@
-package com.gillongname.core
+package com.gillongname.gencycler.core
 
 import android.view.View
 import androidx.annotation.IdRes

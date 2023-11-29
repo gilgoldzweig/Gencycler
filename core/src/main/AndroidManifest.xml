@@ -1,5 +1,1 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="com.gillongname.core">
-
-	/
-</manifest>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"/>
